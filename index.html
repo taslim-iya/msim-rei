@@ -4,1459 +4,702 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MSIM Research Enhanced Index — ETF Creation Platform</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#ffffff;--bg-2:#f8f7f4;--bg-3:#f2f0ec;--sidebar:#f2f0ec;
-  --primary:#003087;--gold:#c8a97e;--gold-light:#f5f0e8;
-  --text:#2a2825;--text-2:#6b6560;--text-3:#a09a94;
-  --border:#e8e4dc;--border-2:#d4cfc7;
-  --green:#2d7a3a;--green-bg:#edf7ef;--red:#c03030;--red-bg:#fdf0f0;
-  --blue:#1a5fb4;--blue-bg:#edf3fc;--orange:#c06000;--orange-bg:#fef5eb;
-  --purple:#6b21a8;--purple-bg:#f3e8ff;
-  --radius:3px;--shadow:0 1px 3px rgba(42,40,37,.08);
-  --font-serif:'EB Garamond',Georgia,serif;
-  --font-sans:'DM Sans','Helvetica Neue',sans-serif;
-  --font-mono:'DM Mono','Consolas',monospace;
-}
-html{font-size:14px;-webkit-font-smoothing:antialiased}
-body{font-family:var(--font-sans);color:var(--text);background:var(--bg-2);line-height:1.5}
-h1,h2,h3,h4{font-family:var(--font-serif);font-weight:600;color:var(--text)}
-h1{font-size:1.8rem}h2{font-size:1.3rem}h3{font-size:1.1rem}h4{font-size:0.95rem}
-input,select,textarea,button{font-family:var(--font-sans);font-size:0.85rem;border-radius:var(--radius)}
-input,select,textarea{border:1px solid var(--border);padding:6px 10px;background:var(--bg);color:var(--text);outline:none;transition:border .15s}
-input:focus,select:focus,textarea:focus{border-color:var(--primary)}
-button{cursor:pointer;border:none;padding:6px 14px;font-weight:500;transition:all .15s}
-a{color:var(--primary);text-decoration:none}
-table{width:100%;border-collapse:collapse;font-size:0.8rem}
-th{text-align:left;padding:8px 10px;font-family:var(--font-sans);font-weight:600;font-size:0.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);border-bottom:2px solid var(--border);background:var(--bg-2);position:sticky;top:0;z-index:1}
-td{padding:7px 10px;border-bottom:1px solid var(--border)}
-tr:hover td{background:var(--bg-2)}
-.mono{font-family:var(--font-mono);font-size:0.8rem}
-.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:10px;font-size:0.7rem;font-weight:600;white-space:nowrap}
-.badge-green{background:var(--green-bg);color:var(--green)}.badge-red{background:var(--red-bg);color:var(--red)}
-.badge-blue{background:var(--blue-bg);color:var(--blue)}.badge-orange{background:var(--orange-bg);color:var(--orange)}
-.badge-gold{background:var(--gold-light);color:#8a6d3b}.badge-purple{background:var(--purple-bg);color:var(--purple)}
-.btn{background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:var(--radius);padding:5px 12px;font-size:0.78rem;font-weight:500}
-.btn:hover{border-color:var(--border-2);background:var(--bg-2)}
-.btn-primary{background:var(--primary);color:#fff;border:none}.btn-primary:hover{opacity:.9}
-.btn-gold{background:var(--gold);color:#fff;border:none}.btn-gold:hover{opacity:.9}
-.btn-danger{background:var(--red);color:#fff;border:none;font-size:.75rem}.btn-danger:hover{opacity:.9}
-.btn-sm{padding:3px 8px;font-size:0.72rem}
-.btn-icon{padding:4px 6px;background:none;border:1px solid transparent;color:var(--text-3);font-size:.8rem}.btn-icon:hover{color:var(--text);border-color:var(--border)}
-.card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
-.card-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px}
-.card-header h3{font-size:0.95rem;margin:0}.card-body{padding:16px}
-.stat-row{display:flex;gap:12px;margin-bottom:16px}
-.stat{flex:1;text-align:center;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius)}
-.stat-val{font-family:var(--font-mono);font-size:1.3rem;font-weight:700;color:var(--primary)}
-.stat-label{font-size:0.68rem;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-top:2px}
-.pos{color:var(--green)}.neg{color:var(--red)}
-.tag{display:inline-block;padding:1px 6px;font-size:0.68rem;border-radius:2px;border:1px solid var(--border);color:var(--text-2);margin:1px}
-.empty{text-align:center;padding:40px;color:var(--text-3);font-style:italic}
-.flex{display:flex}.gap-4{gap:4px}.gap-8{gap:8px}.gap-12{gap:12px}.items-center{align-items:center}.justify-between{justify-content:space-between}
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-.w-full{width:100%}
-.hidden{display:none!important}
-.rule{border:none;border-top:1px solid var(--border);margin:16px 0}
-.score-bar{height:6px;background:var(--bg-3);border-radius:3px;overflow:hidden;width:100%}
-.score-fill{height:100%;border-radius:3px;transition:width .3s}
-.spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .6s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.form-group{margin-bottom:10px}.form-group label{display:block;font-size:0.75rem;font-weight:500;margin-bottom:3px;color:var(--text-2)}
-.form-row{display:flex;gap:10px}.form-row .form-group{flex:1}
+:root{--bg:#fff;--bg2:#f8f7f4;--bg3:#f2f0ec;--sidebar:#f2f0ec;--pri:#003087;--gold:#c8a97e;--goldL:#f5f0e8;--txt:#2a2825;--txt2:#6b6560;--txt3:#a09a94;--bdr:#e8e4dc;--bdr2:#d4cfc7;--grn:#2d7a3a;--grnBg:#edf7ef;--red:#c03030;--redBg:#fdf0f0;--blu:#1a5fb4;--bluBg:#edf3fc;--org:#c06000;--orgBg:#fef5eb;--pur:#6b21a8;--purBg:#f3e8ff;--r:3px;--serif:'EB Garamond',Georgia,serif;--sans:'DM Sans',sans-serif;--mono:'DM Mono',monospace}
+html{font-size:14px;-webkit-font-smoothing:antialiased}body{font-family:var(--sans);color:var(--txt);background:var(--bg2);line-height:1.5}
+h1,h2,h3,h4{font-family:var(--serif);font-weight:600}h1{font-size:1.7rem}h2{font-size:1.25rem}h3{font-size:1.05rem}
+input,select,textarea,button{font-family:var(--sans);font-size:.85rem;border-radius:var(--r)}
+input,select,textarea{border:1px solid var(--bdr);padding:6px 10px;background:var(--bg);color:var(--txt);outline:none}input:focus,select:focus,textarea:focus{border-color:var(--pri)}
+button{cursor:pointer;border:none;padding:6px 14px;font-weight:500;transition:.15s}
+table{width:100%;border-collapse:collapse;font-size:.8rem}th{text-align:left;padding:8px 10px;font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--txt3);border-bottom:2px solid var(--bdr);background:var(--bg2);position:sticky;top:0;z-index:1}td{padding:7px 10px;border-bottom:1px solid var(--bdr)}tr:hover td{background:var(--bg2)}
+.mono{font-family:var(--mono);font-size:.8rem}
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:10px;font-size:.7rem;font-weight:600;white-space:nowrap}
+.bg{background:var(--grnBg);color:var(--grn)}.br{background:var(--redBg);color:var(--red)}.bb{background:var(--bluBg);color:var(--blu)}.bo{background:var(--orgBg);color:var(--org)}.bp{background:var(--purBg);color:var(--pur)}.bgl{background:var(--goldL);color:#8a6d3b}
+.btn{background:var(--bg);border:1px solid var(--bdr);color:var(--txt);border-radius:var(--r);padding:5px 12px;font-size:.78rem;font-weight:500}.btn:hover{background:var(--bg2)}
+.btn-p{background:var(--pri);color:#fff;border:none}.btn-p:hover{opacity:.9}
+.btn-g{background:var(--gold);color:#fff;border:none}.btn-g:hover{opacity:.9}
+.btn-d{background:var(--red);color:#fff;border:none;font-size:.75rem}
+.btn-s{padding:3px 8px;font-size:.72rem}
+.card{background:var(--bg);border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden}
+.ch{padding:12px 16px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;gap:8px}.ch h3{margin:0;font-size:.95rem}
+.cb{padding:16px}
+.sr{display:flex;gap:12px;margin-bottom:16px}.st{flex:1;text-align:center;padding:12px;background:var(--bg);border:1px solid var(--bdr);border-radius:var(--r)}
+.sv{font-family:var(--mono);font-size:1.3rem;font-weight:700;color:var(--pri)}.sl{font-size:.68rem;color:var(--txt3);text-transform:uppercase;letter-spacing:.05em;margin-top:2px}
+.pos{color:var(--grn)}.neg{color:var(--red)}
+.tag{display:inline-block;padding:1px 6px;font-size:.68rem;border-radius:2px;border:1px solid var(--bdr);color:var(--txt2);margin:1px}
+.empty{text-align:center;padding:40px;color:var(--txt3);font-style:italic}
+.flex{display:flex}.g8{gap:8px}.g12{gap:12px}.ac{align-items:center}.jb{justify-content:space-between}.fw{flex-wrap:wrap}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.hidden{display:none!important}.w100{width:100%}
+.rule{border:none;border-top:1px solid var(--bdr);margin:16px 0}
+.fg{margin-bottom:10px}.fg label{display:block;font-size:.75rem;font-weight:500;margin-bottom:3px;color:var(--txt2)}
+.fr{display:flex;gap:10px}.fr .fg{flex:1}
 textarea{min-height:60px;resize:vertical}
-.toast-container{position:fixed;top:16px;right:16px;z-index:2000;display:flex;flex-direction:column;gap:8px;pointer-events:none}
-.toast{padding:10px 16px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);font-size:0.8rem;animation:slideIn .2s ease-out;pointer-events:auto}
-.toast-success{border-left:3px solid var(--green)}.toast-error{border-left:3px solid var(--red)}.toast-info{border-left:3px solid var(--primary)}
-@keyframes slideIn{from{transform:translateX(40px);opacity:0}to{transform:translateX(0);opacity:1}}
-.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:16px}
-.tab{padding:8px 16px;font-size:0.8rem;font-weight:500;color:var(--text-3);cursor:pointer;border-bottom:2px solid transparent;transition:all .1s}
-.tab:hover{color:var(--text)}.tab.active{color:var(--primary);border-bottom-color:var(--primary)}
-/* Modal */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:1000;display:flex;align-items:center;justify-content:center}
-.modal{background:var(--bg);border-radius:var(--radius);width:560px;max-width:95vw;max-height:85vh;overflow-y:auto;box-shadow:0 8px 30px rgba(0,0,0,.15)}
-.modal-header{padding:16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.modal-header h3{font-family:var(--font-serif);font-size:1.1rem;margin:0}
-.modal-body{padding:16px}.modal-footer{padding:12px 16px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
-/* Layout */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--bdr);margin-bottom:16px}.tab{padding:8px 16px;font-size:.8rem;font-weight:500;color:var(--txt3);cursor:pointer;border-bottom:2px solid transparent}.tab:hover{color:var(--txt)}.tab.active{color:var(--pri);border-bottom-color:var(--pri)}
+.sbar{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;width:100%}.sfill{height:100%;border-radius:3px}
+.toast-c{position:fixed;top:16px;right:16px;z-index:2000;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{padding:10px 16px;background:var(--bg);border:1px solid var(--bdr);border-radius:var(--r);font-size:.8rem;animation:si .2s;pointer-events:auto}
+.ts{border-left:3px solid var(--grn)}.te{border-left:3px solid var(--red)}.ti{border-left:3px solid var(--pri)}
+@keyframes si{from{transform:translateX(40px);opacity:0}to{transform:translateX(0);opacity:1}}
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:1000;display:flex;align-items:center;justify-content:center}
+.md{background:var(--bg);border-radius:var(--r);width:600px;max-width:95vw;max-height:85vh;overflow-y:auto;box-shadow:0 8px 30px rgba(0,0,0,.15)}
+.mh{padding:16px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between}.mh h3{font-family:var(--serif);font-size:1.1rem;margin:0}
+.mb{padding:16px}.mf{padding:12px 16px;border-top:1px solid var(--bdr);display:flex;justify-content:flex-end;gap:8px}
 .app{display:flex;height:100vh;overflow:hidden}
-.sidebar{width:230px;flex-shrink:0;background:var(--sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
-.sidebar-brand{padding:20px 16px 12px;font-family:var(--font-serif);font-size:1rem;font-weight:700;color:var(--primary);border-bottom:1px solid var(--border)}
-.sidebar-brand small{display:block;font-family:var(--font-sans);font-size:0.65rem;color:var(--text-3);font-weight:400;letter-spacing:.08em;text-transform:uppercase;margin-top:2px}
-.nav-section{padding:12px 0}.nav-section-label{padding:4px 16px;font-size:0.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3)}
-.nav-item{display:flex;align-items:center;gap:8px;padding:7px 16px;font-size:0.8rem;color:var(--text-2);cursor:pointer;border-left:2px solid transparent;transition:all .1s}
-.nav-item:hover{background:rgba(0,48,135,.04);color:var(--text)}.nav-item.active{background:rgba(0,48,135,.06);color:var(--primary);border-left-color:var(--primary);font-weight:600}
-.nav-item .count{margin-left:auto;font-size:.65rem;background:var(--primary);color:#fff;padding:1px 6px;border-radius:8px}
+.sidebar{width:220px;flex-shrink:0;background:var(--sidebar);border-right:1px solid var(--bdr);display:flex;flex-direction:column;overflow-y:auto}
+.sb{padding:20px 16px 12px;font-family:var(--serif);font-size:1rem;font-weight:700;color:var(--pri);border-bottom:1px solid var(--bdr)}.sb small{display:block;font-family:var(--sans);font-size:.65rem;color:var(--txt3);font-weight:400;letter-spacing:.08em;text-transform:uppercase;margin-top:2px}
+.ns{padding:12px 0}.nsl{padding:4px 16px;font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--txt3)}
+.ni{display:flex;align-items:center;gap:8px;padding:7px 16px;font-size:.8rem;color:var(--txt2);cursor:pointer;border-left:2px solid transparent}.ni:hover{background:rgba(0,48,135,.04);color:var(--txt)}.ni.active{background:rgba(0,48,135,.06);color:var(--pri);border-left-color:var(--pri);font-weight:600}
+.ni .ct{margin-left:auto;font-size:.65rem;background:var(--pri);color:#fff;padding:1px 6px;border-radius:8px}
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden}
-.main-scroll{flex:1;overflow-y:auto}
+.ms{flex:1;overflow-y:auto}
 .page{padding:24px 32px;max-width:1200px}
-.page-header{margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid var(--border)}
-.page-header h1{margin-bottom:2px}.page-header p{color:var(--text-2);font-size:0.85rem}
-.toolbar{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
-.search-input{padding:5px 10px;width:200px}
-/* Chat pane */
-.chat-pane{border-top:1px solid var(--border);background:var(--bg);display:flex;flex-direction:column;transition:height .2s}
-.chat-pane.collapsed{height:42px;overflow:hidden}
-.chat-pane.expanded{height:340px}
-.chat-header{padding:8px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;background:var(--bg-2);border-bottom:1px solid var(--border);flex-shrink:0}
-.chat-header h4{font-size:.85rem;margin:0}
-.chat-messages{flex:1;overflow-y:auto;padding:12px 16px}
-.chat-msg{margin-bottom:10px;display:flex;gap:8px}
-.chat-msg .avatar{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;flex-shrink:0;margin-top:2px}
-.chat-msg.user .avatar{background:var(--text);color:var(--bg)}
-.chat-msg.ai .avatar{background:var(--primary);color:#fff}
-.chat-msg .bubble{font-size:.8rem;line-height:1.5;max-width:100%}
-.chat-msg .bubble pre{background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius);padding:8px;font-size:.75rem;overflow-x:auto;white-space:pre-wrap;margin:4px 0}
-.chat-input-row{display:flex;gap:6px;padding:8px 16px;border-top:1px solid var(--border);flex-shrink:0}
-.chat-input-row input{flex:1}
-/* Strategy cards */
-.strategy-card{border:1px solid var(--border);border-radius:var(--radius);padding:16px;background:var(--bg);cursor:pointer;transition:all .15s}
-.strategy-card:hover{border-color:var(--primary);box-shadow:0 2px 8px rgba(0,48,135,.08)}
-.strategy-card.active{border-color:var(--primary);background:rgba(0,48,135,.02)}
-.strategy-card h4{margin-bottom:4px}.strategy-card p{font-size:.78rem;color:var(--text-2);margin-bottom:8px}
-/* Factor chips */
-.factor-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:12px;font-size:.7rem;font-weight:500;border:1px solid var(--border);background:var(--bg-2);margin:2px}
-.factor-chip.active{background:var(--primary);color:#fff;border-color:var(--primary)}
-::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border-2);border-radius:3px}
+.ph{margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid var(--bdr)}.ph h1{margin-bottom:2px}.ph p{color:var(--txt2);font-size:.85rem}
+.tb{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+/* Chat */
+.cp{border-top:1px solid var(--bdr);background:var(--bg);display:flex;flex-direction:column;transition:height .2s}
+.cp.coll{height:42px;overflow:hidden}.cp.exp{height:320px}
+.cph{padding:8px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;background:var(--bg2);border-bottom:1px solid var(--bdr);flex-shrink:0}.cph h4{font-size:.85rem;margin:0}
+.cms{flex:1;overflow-y:auto;padding:12px 16px}
+.cm{margin-bottom:10px;display:flex;gap:8px}.cm .av{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;flex-shrink:0;margin-top:2px}
+.cm.u .av{background:var(--txt);color:var(--bg)}.cm.a .av{background:var(--pri);color:#fff}
+.cm .bl{font-size:.8rem;line-height:1.5}
+.cir{display:flex;gap:6px;padding:8px 16px;border-top:1px solid var(--bdr);flex-shrink:0}.cir input{flex:1}
+/* Audit */
+.audit{font-size:.72rem;color:var(--txt3);padding:4px 8px;border-left:2px solid var(--bdr);margin:4px 0;background:var(--bg2);border-radius:0 var(--r) var(--r) 0}
+.audit b{color:var(--txt2)}
+.step-ind{display:flex;gap:0;margin-bottom:20px}.step-dot{flex:1;text-align:center;padding:8px 4px;font-size:.72rem;font-weight:600;color:var(--txt3);border-bottom:3px solid var(--bdr);cursor:pointer}.step-dot.done{color:var(--grn);border-bottom-color:var(--grn)}.step-dot.current{color:var(--pri);border-bottom-color:var(--pri)}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:3px}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--bdr);border-top-color:var(--pri);border-radius:50%;animation:spin .6s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
-<div class="toast-container" id="toasts"></div>
+<div class="toast-c" id="toasts"></div>
 <div id="modal-root"></div>
 
 <div class="app">
 <div class="sidebar">
-  <div class="sidebar-brand">MSIM<small>Research Enhanced Index</small></div>
-  <div class="nav-section">
-    <div class="nav-section-label">Strategies</div>
-    <div class="nav-item active" onclick="nav('strategies')" id="nav-strategies">Strategy Manager</div>
-    <div class="nav-item" onclick="nav('ratings')" id="nav-ratings">Rating Engine</div>
-    <div class="nav-item" onclick="nav('signals')" id="nav-signals">Signal Feed</div>
-    <div class="nav-item" onclick="nav('trades')" id="nav-trades">Trade Proposals</div>
-    <div class="nav-item" onclick="nav('pm')" id="nav-pm">PM Queue</div>
+  <div class="sb">MSIM<small>Research Enhanced Index</small></div>
+  <div class="ns">
+    <div class="nsl">Workflow</div>
+    <div class="ni active" onclick="nav('dash')" id="nav-dash">Dashboard</div>
+    <div class="ni" onclick="nav('theses')" id="nav-theses">Theses</div>
+    <div class="ni" onclick="nav('universe')" id="nav-universe">Universe & Signals</div>
+    <div class="ni" onclick="nav('etfs')" id="nav-etfs">ETF Builder</div>
+    <div class="ni" onclick="nav('review')" id="nav-review">PM Review</div>
+    <div class="ni" onclick="nav('audit')" id="nav-audit">Audit Trail</div>
   </div>
-  <div class="nav-section">
-    <div class="nav-section-label">ETF Builder</div>
-    <div class="nav-item" onclick="nav('etfs')" id="nav-etfs">My ETFs</div>
-    <div class="nav-item" onclick="nav('optimizer')" id="nav-optimizer">Optimizer</div>
-    <div class="nav-item" onclick="nav('compliance')" id="nav-compliance">Compliance</div>
-    <div class="nav-item" onclick="nav('backtest')" id="nav-backtest">Backtest Lab</div>
+  <div class="ns">
+    <div class="nsl">Data</div>
+    <div class="ni" onclick="nav('data')" id="nav-data">Data Hub</div>
+    <div class="ni" onclick="nav('macro')" id="nav-macro">Macro</div>
   </div>
-  <div class="nav-section">
-    <div class="nav-section-label">Data</div>
-    <div class="nav-item" onclick="nav('datahub')" id="nav-datahub">Data Hub</div>
-    <div class="nav-item" onclick="nav('universe')" id="nav-universe">Universe</div>
-    <div class="nav-item" onclick="nav('macro')" id="nav-macro">Macro Dashboard</div>
-  </div>
-  <div style="margin-top:auto;padding:12px 16px;border-top:1px solid var(--border)">
-    <div class="form-group"><label>OpenAI API Key</label><input id="aiKey" type="password" placeholder="sk-..." style="width:100%;font-size:.72rem"></div>
-    <div class="form-group"><label>FMP Key</label><input id="fmpKey" placeholder="FMP key" style="width:100%;font-size:.72rem"></div>
-    <div class="form-group"><label>Finnhub Key</label><input id="finnhubKey" placeholder="Finnhub key" style="width:100%;font-size:.72rem"></div>
-    <div class="form-group"><label>Alpha Vantage Key</label><input id="avKey" placeholder="AV key" style="width:100%;font-size:.72rem"></div>
-    <button class="btn btn-sm w-full btn-primary" onclick="saveKeys()">Save Keys</button>
+  <div style="margin-top:auto;padding:12px 16px;border-top:1px solid var(--bdr)">
+    <div class="fg"><label>OpenAI Key</label><input id="aiKey" type="password" placeholder="sk-..." style="width:100%;font-size:.72rem"></div>
+    <div class="fg"><label>FMP Key</label><input id="fmpKey" placeholder="FMP key" style="width:100%;font-size:.72rem"></div>
+    <div class="fg"><label>Finnhub Key</label><input id="fhKey" placeholder="Finnhub" style="width:100%;font-size:.72rem"></div>
+    <button class="btn btn-s w100 btn-p" onclick="saveKeys()">Save Keys</button>
   </div>
 </div>
 
 <div class="main">
-<div class="main-scroll" id="main-scroll">
+<div class="ms" id="ms">
 
-<!-- STRATEGIES -->
-<div class="page" id="panel-strategies">
-  <div class="page-header">
-    <h1>Strategy Manager</h1>
-    <p>Create, configure, and manage investment strategies. Each strategy defines scoring rules that automatically rate your universe.</p>
+<!-- DASHBOARD -->
+<div class="page" id="panel-dash">
+  <div class="ph"><h1>Dashboard</h1><p>Research Enhanced Index — ETF creation workflow</p></div>
+  <div class="sr">
+    <div class="st"><div class="sv" id="d-theses">0</div><div class="sl">Active Theses</div></div>
+    <div class="st"><div class="sv" id="d-etfs">0</div><div class="sl">ETFs in Progress</div></div>
+    <div class="st"><div class="sv" id="d-pending">0</div><div class="sl">Pending PM Review</div></div>
+    <div class="st"><div class="sv" id="d-stocks">0</div><div class="sl">Universe Stocks</div></div>
   </div>
-  <div class="toolbar">
-    <button class="btn btn-primary" onclick="openNewStrategy()">+ New Strategy</button>
-    <button class="btn" onclick="duplicateStrategy()">Duplicate Active</button>
-    <span style="margin-left:auto;font-size:.78rem;color:var(--text-2)">Active: <strong id="active-strategy-name">--</strong></span>
+  <div class="g2">
+    <div class="card"><div class="ch"><h3>Recent Activity</h3></div><div class="cb" id="d-activity" style="max-height:300px;overflow-y:auto"><div class="empty">No activity yet. Start by creating a thesis.</div></div></div>
+    <div class="card"><div class="ch"><h3>Quick Actions</h3></div><div class="cb">
+      <button class="btn btn-p w100" style="margin-bottom:8px" onclick="nav('theses');openNewThesis()">Create New Thesis</button>
+      <button class="btn w100" style="margin-bottom:8px" onclick="nav('universe')">View Universe & Signals</button>
+      <button class="btn w100" style="margin-bottom:8px" onclick="nav('review')">Review PM Queue</button>
+      <button class="btn w100" onclick="nav('data')">Import Data</button>
+    </div></div>
   </div>
-  <div id="strategy-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px"></div>
+  <div class="card" style="margin-top:12px"><div class="ch"><h3>AI Strategy Suggestions</h3><button class="btn btn-s" onclick="genAISuggestions()">Generate</button></div>
+  <div class="cb" id="d-suggestions"><div class="empty">Click Generate for AI-powered strategy ideas based on current signals.</div></div></div>
 </div>
 
-<!-- RATINGS -->
-<div class="page hidden" id="panel-ratings">
-  <div class="page-header"><h1>Rating Engine</h1><p>Automated multi-factor scoring based on the active strategy</p></div>
-  <div class="stat-row">
-    <div class="stat"><div class="stat-val pos" id="r-buy">0</div><div class="stat-label">Buy</div></div>
-    <div class="stat"><div class="stat-val" id="r-hold">0</div><div class="stat-label">Hold</div></div>
-    <div class="stat"><div class="stat-val neg" id="r-sell">0</div><div class="stat-label">Sell</div></div>
-    <div class="stat"><div class="stat-val" id="r-scored">0</div><div class="stat-label">Scored</div></div>
+<!-- THESES -->
+<div class="page hidden" id="panel-theses">
+  <div class="ph"><h1>Investment Theses</h1><p>Define your thesis, backtest it, then build an ETF from it</p></div>
+  <div class="tb">
+    <button class="btn btn-p" onclick="openNewThesis()">+ New Thesis</button>
+    <button class="btn" onclick="openThesisFromChat()">Create via AI Chat</button>
   </div>
-  <div class="toolbar">
-    <select id="rating-strategy" onchange="switchRatingStrategy()"></select>
-    <input class="search-input" placeholder="Search ticker..." oninput="renderRatings()" id="rating-search">
-    <select id="rating-filter" onchange="renderRatings()"><option value="">All Ratings</option><option value="Strong Buy">Strong Buy</option><option value="Buy">Buy</option><option value="Hold">Hold</option><option value="Sell">Sell</option></select>
-    <button class="btn btn-sm btn-primary" onclick="runAutoScore()">Re-Score All</button>
-    <button class="btn btn-sm btn-gold" onclick="pushBuysToTrades()">Push Buys to Trades</button>
-    <button class="btn btn-sm" onclick="exportCSV('ratings')">Export CSV</button>
-  </div>
-  <div class="card"><div class="card-body" style="padding:0;max-height:480px;overflow-y:auto">
-    <table><thead><tr><th>#</th><th>Ticker</th><th>Name</th><th>Sector</th><th>Factors</th><th>Composite</th><th>Rating</th><th>AI Insight</th></tr></thead>
-    <tbody id="ratings-tbody"></tbody></table>
-  </div></div>
+  <div id="theses-list"></div>
 </div>
 
-<!-- SIGNALS -->
-<div class="page hidden" id="panel-signals">
-  <div class="page-header"><h1>Signal Feed</h1><p>Analyst ratings, price-target changes, and quantitative signals</p></div>
-  <div class="stat-row">
-    <div class="stat"><div class="stat-val pos" id="sig-up">0</div><div class="stat-label">Upgrades</div></div>
-    <div class="stat"><div class="stat-val neg" id="sig-down">0</div><div class="stat-label">Downgrades</div></div>
-    <div class="stat"><div class="stat-val" id="sig-init">0</div><div class="stat-label">Initiations</div></div>
-    <div class="stat"><div class="stat-val" id="sig-total">0</div><div class="stat-label">Total</div></div>
+<!-- UNIVERSE & SIGNALS -->
+<div class="page hidden" id="panel-universe">
+  <div class="ph"><h1>Universe & Signals</h1><p>Investable stocks and analyst signals</p></div>
+  <div class="tabs">
+    <div class="tab active" onclick="showUT('stocks')">Stocks (<span id="u-ct">0</span>)</div>
+    <div class="tab" onclick="showUT('signals')">Signals (<span id="s-ct">0</span>)</div>
   </div>
-  <div class="toolbar">
-    <select id="sig-type" onchange="renderSignals()"><option value="">All Types</option><option value="upgrade">Upgrades</option><option value="downgrade">Downgrades</option><option value="initiation">Initiations</option><option value="pt_raise">PT Raises</option><option value="pt_cut">PT Cuts</option></select>
-    <input class="search-input" placeholder="Search..." oninput="renderSignals()" id="sig-search">
-    <button class="btn btn-sm" onclick="fetchLiveSignals()">Fetch Live</button>
-    <button class="btn btn-sm" onclick="exportCSV('signals')">Export</button>
+  <div id="ut-stocks">
+    <div class="tb">
+      <input placeholder="Search..." oninput="renderU()" id="u-q" style="width:180px">
+      <select id="u-sec" onchange="renderU()"><option value="">All Sectors</option></select>
+      <button class="btn btn-s" onclick="exportCSV('universe')">Export</button>
+    </div>
+    <div class="card"><div class="cb" style="padding:0;max-height:480px;overflow-y:auto">
+      <table><thead><tr><th>Ticker</th><th>Name</th><th>Sector</th><th>Mkt Cap</th><th>P/E</th><th>Div%</th><th>Signals</th><th>Add to ETF</th></tr></thead>
+      <tbody id="u-tbody"></tbody></table>
+    </div></div>
   </div>
-  <div class="card"><div class="card-body" style="padding:0;max-height:480px;overflow-y:auto">
-    <table><thead><tr><th>Date</th><th>Ticker</th><th>Type</th><th>Analyst</th><th>From</th><th>To</th><th>PT</th><th>Actions</th></tr></thead>
-    <tbody id="signals-tbody"></tbody></table>
-  </div></div>
+  <div id="ut-signals" class="hidden">
+    <div class="tb">
+      <select id="s-type" onchange="renderS()"><option value="">All</option><option value="upgrade">Upgrades</option><option value="downgrade">Downgrades</option><option value="initiation">Initiations</option><option value="pt_raise">PT Raise</option><option value="pt_cut">PT Cut</option></select>
+      <select id="s-analyst" onchange="renderS()"><option value="">All Analysts</option></select>
+      <input placeholder="Search..." oninput="renderS()" id="s-q" style="width:180px">
+      <button class="btn btn-s" onclick="fetchLive()">Fetch Live</button>
+      <button class="btn btn-s" onclick="exportCSV('signals')">Export</button>
+    </div>
+    <div class="card"><div class="cb" style="padding:0;max-height:480px;overflow-y:auto">
+      <table><thead><tr><th>Date</th><th>Ticker</th><th>Type</th><th>Analyst</th><th>From/To</th><th>PT</th><th>Actions</th></tr></thead>
+      <tbody id="s-tbody"></tbody></table>
+    </div></div>
+  </div>
 </div>
 
-<!-- TRADES -->
-<div class="page hidden" id="panel-trades">
-  <div class="page-header"><h1>Trade Proposals</h1><p>AI-generated and manual trade ideas pending review</p></div>
-  <div class="stat-row">
-    <div class="stat"><div class="stat-val" id="t-pending">0</div><div class="stat-label">Pending</div></div>
-    <div class="stat"><div class="stat-val pos" id="t-approved">0</div><div class="stat-label">Approved</div></div>
-    <div class="stat"><div class="stat-val neg" id="t-rejected">0</div><div class="stat-label">Rejected</div></div>
-  </div>
-  <div class="toolbar">
-    <select id="trade-filter" onchange="renderTrades()"><option value="">All</option><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option></select>
-    <button class="btn btn-sm" onclick="exportCSV('trades')">Export</button>
-  </div>
-  <div class="card"><div class="card-body" style="padding:0;max-height:480px;overflow-y:auto">
-    <table><thead><tr><th>Date</th><th>Ticker</th><th>Strategy</th><th>Side</th><th>Score</th><th>Rationale</th><th>Status</th><th>Actions</th></tr></thead>
-    <tbody id="trades-tbody"></tbody></table>
-  </div></div>
-</div>
-
-<!-- PM QUEUE -->
-<div class="page hidden" id="panel-pm">
-  <div class="page-header"><h1>PM Queue</h1><p>Portfolio manager approval queue</p></div>
-  <div class="toolbar">
-    <button class="btn btn-sm btn-primary" onclick="approveAll()">Approve All</button>
-    <button class="btn btn-sm" onclick="exportCSV('pm')">Export</button>
-  </div>
-  <div class="card"><div class="card-body" style="padding:0;max-height:500px;overflow-y:auto">
-    <table><thead><tr><th>Date</th><th>Ticker</th><th>Strategy</th><th>Side</th><th>Score</th><th>Rationale</th><th>Action</th></tr></thead>
-    <tbody id="pm-tbody"></tbody></table>
-  </div></div>
-</div>
-
-<!-- MY ETFs -->
+<!-- ETF BUILDER -->
 <div class="page hidden" id="panel-etfs">
-  <div class="page-header"><h1>My ETFs</h1><p>Create and manage ETF portfolios tied to strategies</p></div>
-  <div class="toolbar">
-    <button class="btn btn-primary" onclick="openNewETF()">+ New ETF</button>
-    <select id="etf-select" onchange="switchETF()"></select>
-    <button class="btn btn-sm btn-gold" onclick="importApprovedToETF()">Import Approved Trades</button>
-    <button class="btn btn-sm" onclick="equalWeightETF()">Equal Weight</button>
-    <button class="btn btn-sm" onclick="capWeightETF()">Cap Weight</button>
-    <button class="btn btn-sm" onclick="exportCSV('etf')">Export</button>
-    <span style="margin-left:auto;font-size:.8rem">Total: <strong id="etf-total-weight">0%</strong></span>
+  <div class="ph"><h1>ETF Builder</h1><p>Build, weight, and validate ETF portfolios</p></div>
+  <div class="tb">
+    <select id="etf-sel" onchange="switchETF()"></select>
+    <button class="btn btn-p" onclick="openNewETF()">+ New ETF</button>
+    <button class="btn" onclick="eqW()">Equal Weight</button>
+    <button class="btn" onclick="capW()">Cap Weight</button>
+    <button class="btn btn-g" onclick="submitForReview()">Submit for PM Review</button>
+    <button class="btn btn-s" onclick="exportCSV('etf')">Export</button>
+    <span style="margin-left:auto;font-size:.8rem">Total: <b id="etf-tw">0%</b></span>
   </div>
-  <div id="etf-info" style="margin-bottom:12px"></div>
-  <div class="card"><div class="card-body" style="padding:0;max-height:440px;overflow-y:auto">
-    <table><thead><tr><th>Ticker</th><th>Name</th><th>Sector</th><th>Weight %</th><th>Score</th><th>Rating</th><th>Actions</th></tr></thead>
+  <div id="etf-meta" style="margin-bottom:12px"></div>
+  <div class="step-ind" id="etf-steps"></div>
+  <div class="card"><div class="cb" style="padding:0;max-height:420px;overflow-y:auto">
+    <table><thead><tr><th>Ticker</th><th>Name</th><th>Sector</th><th>Weight%</th><th>Rationale</th><th>Added</th><th>Actions</th></tr></thead>
     <tbody id="etf-tbody"></tbody></table>
   </div></div>
+  <div style="margin-top:12px" class="g2">
+    <div class="card"><div class="ch"><h3>Compliance</h3><button class="btn btn-s btn-p" onclick="runComp()">Check</button></div><div class="cb" id="comp-body"><div class="empty">Run compliance checks</div></div></div>
+    <div class="card"><div class="ch"><h3>Backtest</h3><button class="btn btn-s btn-p" onclick="runBT()">Run</button></div><div class="cb" id="bt-body"><div class="empty">Backtest this ETF</div></div></div>
+  </div>
 </div>
 
-<!-- OPTIMIZER -->
-<div class="page hidden" id="panel-optimizer">
-  <div class="page-header"><h1>Portfolio Optimizer</h1><p>Optimize the active ETF's weights</p></div>
-  <div class="card"><div class="card-header"><h3>Parameters</h3><button class="btn btn-sm btn-primary" onclick="runOptimizer()">Optimize</button></div>
-  <div class="card-body">
-    <div class="form-row">
-      <div class="form-group"><label>Objective</label><select id="opt-obj"><option>Max Sharpe</option><option>Min Variance</option><option>Max Return</option><option>Risk Parity</option></select></div>
-      <div class="form-group"><label>Max Position %</label><input type="number" id="opt-maxpos" value="5" step="0.5"></div>
-      <div class="form-group"><label>Max Sector %</label><input type="number" id="opt-maxsec" value="25" step="1"></div>
-      <div class="form-group"><label>Tracking Error (bps)</label><input type="number" id="opt-te" value="200" step="10"></div>
-    </div>
+<!-- PM REVIEW -->
+<div class="page hidden" id="panel-review">
+  <div class="ph"><h1>PM Review Queue</h1><p>ETFs submitted for portfolio manager approval</p></div>
+  <div id="review-list"></div>
+</div>
+
+<!-- AUDIT TRAIL -->
+<div class="page hidden" id="panel-audit">
+  <div class="ph"><h1>Audit Trail</h1><p>Complete history of every action, decision, and change</p></div>
+  <div class="tb">
+    <select id="aud-filter" onchange="renderAudit()"><option value="">All</option><option value="thesis">Thesis</option><option value="etf">ETF</option><option value="stock">Stock Add/Remove</option><option value="review">PM Review</option><option value="signal">Signal</option></select>
+    <button class="btn btn-s" onclick="exportCSV('audit')">Export</button>
+  </div>
+  <div class="card"><div class="cb" style="padding:0;max-height:560px;overflow-y:auto">
+    <table><thead><tr><th>Timestamp</th><th>Type</th><th>Action</th><th>Detail</th><th>User</th></tr></thead>
+    <tbody id="aud-tbody"></tbody></table>
   </div></div>
-  <div id="opt-results" style="margin-top:16px"></div>
-</div>
-
-<!-- COMPLIANCE -->
-<div class="page hidden" id="panel-compliance">
-  <div class="page-header"><h1>Compliance</h1><p>Validate active ETF against rules</p></div>
-  <div class="toolbar"><button class="btn btn-sm btn-primary" onclick="runCompliance()">Run Checks</button></div>
-  <div id="compliance-results"><div class="empty">Select an ETF and run compliance checks.</div></div>
-</div>
-
-<!-- BACKTEST -->
-<div class="page hidden" id="panel-backtest">
-  <div class="page-header"><h1>Backtest Lab</h1><p>Define a thesis, test it against history, and convert winning strategies into ETFs</p></div>
-  <div class="tabs">
-    <div class="tab active" onclick="showBTTab('thesis')">Thesis Builder</div>
-    <div class="tab" onclick="showBTTab('strategy')">Strategy Backtest</div>
-    <div class="tab" onclick="showBTTab('ideas')">AI Ideas</div>
-    <div class="tab" onclick="showBTTab('history')">Run History</div>
-  </div>
-
-  <!-- Thesis Builder -->
-  <div id="bt-thesis">
-    <div class="grid-2">
-      <div class="card"><div class="card-header"><h3>Define Your Thesis</h3></div>
-      <div class="card-body">
-        <div class="form-group"><label>Thesis Name</label><input id="th-name" placeholder="e.g. Follow Goldman Upgrades" style="width:100%"></div>
-        <div class="form-group"><label>Describe your thesis (AI will structure it)</label><textarea id="th-desc" style="width:100%;min-height:80px" placeholder="e.g. Buy any stock Goldman Sachs or Morgan Stanley upgrades to Buy/Overweight within 5 days of the signal. Hold for 90 days. Sell if downgraded."></textarea></div>
-        <div class="form-group"><label>Or build manually:</label></div>
-        <div class="form-group"><label>Signal Type</label>
-          <div class="flex gap-4" style="flex-wrap:wrap" id="th-signal-types">
-            <label class="factor-chip"><input type="checkbox" value="upgrade" checked> Upgrades</label>
-            <label class="factor-chip"><input type="checkbox" value="initiation"> Initiations</label>
-            <label class="factor-chip"><input type="checkbox" value="pt_raise"> PT Raises</label>
-            <label class="factor-chip"><input type="checkbox" value="downgrade"> Downgrades (short)</label>
-          </div>
-        </div>
-        <div class="form-group"><label>Follow These Analysts Only (or leave blank for all)</label>
-          <div id="th-analyst-picks" style="max-height:150px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius);padding:8px"></div>
-        </div>
-        <div class="form-row">
-          <div class="form-group"><label>Hold Period (days)</label><input type="number" id="th-hold" value="90" min="1"></div>
-          <div class="form-group"><label>Max Positions</label><input type="number" id="th-maxpos" value="20" min="1"></div>
-          <div class="form-group"><label>Position Sizing</label><select id="th-sizing"><option value="equal">Equal Weight</option><option value="score">Score-Weighted</option><option value="conviction">Conviction (Top N)</option></select></div>
-        </div>
-        <div class="form-row">
-          <div class="form-group"><label>Stop Loss %</label><input type="number" id="th-stop" value="15" min="0" step="1"></div>
-          <div class="form-group"><label>Take Profit %</label><input type="number" id="th-tp" value="30" min="0" step="1"></div>
-          <div class="form-group"><label>Sectors (blank=all)</label><input id="th-sectors" placeholder="Tech, Healthcare..."></div>
-        </div>
-        <div class="form-row">
-          <div class="form-group"><label>Min Market Cap ($B)</label><input type="number" id="th-minmc" value="10"></div>
-          <div class="form-group"><label>Min Analyst Score</label><input type="number" id="th-minscore" value="0" min="0" max="100"></div>
-        </div>
-        <div style="margin-top:12px" class="flex gap-8">
-          <button class="btn btn-primary" onclick="runThesisBacktest()">Run Backtest</button>
-          <button class="btn btn-gold" onclick="aiStructureThesis()">AI: Structure My Thesis</button>
-          <button class="btn" onclick="saveThesisAsStrategy()">Save as Strategy</button>
-        </div>
-      </div></div>
-
-      <div class="card"><div class="card-header"><h3>Quick Thesis Templates</h3></div>
-      <div class="card-body" id="thesis-templates" style="max-height:400px;overflow-y:auto"></div></div>
-    </div>
-    <div id="thesis-results" style="margin-top:16px"></div>
-  </div>
-
-  <!-- Strategy Backtest -->
-  <div id="bt-strategy" class="hidden">
-    <div class="card"><div class="card-header"><h3>Backtest a Strategy</h3><button class="btn btn-sm btn-primary" onclick="runStrategyBacktest()">Run</button></div>
-    <div class="card-body">
-      <div class="form-row">
-        <div class="form-group"><label>Strategy</label><select id="bt-strat" style="width:100%"></select></div>
-        <div class="form-group"><label>Start</label><input type="date" id="bt-start" value="2024-01-01"></div>
-        <div class="form-group"><label>End</label><input type="date" id="bt-end" value="2026-04-01"></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><label>Benchmark</label><select id="bt-bench"><option value="SP500">S&P 500</option><option value="FTSE">FTSE 100</option><option value="MSCIW">MSCI World</option></select></div>
-        <div class="form-group"><label>Rebalance</label><select id="bt-freq"><option>Monthly</option><option>Quarterly</option></select></div>
-        <div class="form-group"><label>Top N Holdings</label><input type="number" id="bt-topn" value="20" min="5" max="100"></div>
-      </div>
-    </div></div>
-    <div id="strategy-bt-results" style="margin-top:16px"></div>
-  </div>
-
-  <!-- AI Ideas -->
-  <div id="bt-ideas" class="hidden">
-    <div class="card"><div class="card-header"><h3>AI-Generated Strategy Ideas</h3><button class="btn btn-sm btn-primary" onclick="generateAIIdeas()">Generate Ideas</button></div>
-    <div class="card-body">
-      <p style="font-size:.8rem;color:var(--text-2);margin-bottom:12px">AI analyses your universe, signals, and market conditions to suggest strategies you may not have considered.</p>
-      <div id="ai-ideas-list"></div>
-    </div></div>
-  </div>
-
-  <!-- Run History -->
-  <div id="bt-history" class="hidden">
-    <div class="card"><div class="card-body" style="padding:0;max-height:500px;overflow-y:auto">
-      <table><thead><tr><th>Date</th><th>Thesis/Strategy</th><th>Return</th><th>Alpha</th><th>Sharpe</th><th>Max DD</th><th>Actions</th></tr></thead>
-      <tbody id="bt-history-tbody"></tbody></table>
-    </div></div>
-  </div>
 </div>
 
 <!-- DATA HUB -->
-<div class="page hidden" id="panel-datahub">
-  <div class="page-header"><h1>Data Hub</h1><p>Upload data, connect APIs, or scrape web sources</p></div>
+<div class="page hidden" id="panel-data">
+  <div class="ph"><h1>Data Hub</h1><p>Upload data, connect APIs, or scrape sources</p></div>
   <div class="tabs">
-    <div class="tab active" onclick="showDataTab('upload')">Upload</div>
-    <div class="tab" onclick="showDataTab('api')">API Sources</div>
-    <div class="tab" onclick="showDataTab('scrape')">Web Scrape</div>
-    <div class="tab" onclick="showDataTab('history')">Import History</div>
+    <div class="tab active" onclick="showDT('upload')">Upload</div>
+    <div class="tab" onclick="showDT('api')">API Sources</div>
+    <div class="tab" onclick="showDT('scrape')">Web Scrape</div>
   </div>
-  <div id="data-upload">
-    <div class="card"><div class="card-header"><h3>Upload CSV / Excel / JSON</h3></div>
-    <div class="card-body">
-      <p style="font-size:.8rem;color:var(--text-2);margin-bottom:12px">Upload stock data. Expected columns: ticker, name, sector, marketCap, pe, divYield, price. Extra columns become custom fields.</p>
-      <input type="file" id="file-upload" accept=".csv,.json,.tsv,.txt,.xlsx,.xls" onchange="handleFileUpload(event)" style="margin-bottom:8px">
-      <div style="margin-top:8px"><label style="font-size:.78rem;color:var(--text-2)"><input type="checkbox" id="upload-replace"> Replace existing universe (default: merge)</label></div>
-      <div id="upload-preview" style="margin-top:12px"></div>
+  <div id="dt-upload">
+    <div class="card"><div class="ch"><h3>Upload CSV / JSON</h3></div><div class="cb">
+      <p style="font-size:.8rem;color:var(--txt2);margin-bottom:8px">Expected: ticker, name, sector, marketCap, pe, divYield, price. Extra columns kept as custom fields.</p>
+      <input type="file" id="file-up" accept=".csv,.json,.tsv,.txt" onchange="handleUpload(event)">
+      <div id="up-preview" style="margin-top:12px"></div>
     </div></div>
-    <div class="card" style="margin-top:12px"><div class="card-header"><h3>Paste Data</h3><button class="btn btn-sm btn-primary" onclick="parsePastedData()">Import</button></div>
-    <div class="card-body"><textarea id="paste-data" placeholder="Paste CSV, JSON, or tab-separated data here..." style="width:100%;min-height:100px;font-family:var(--font-mono);font-size:.75rem"></textarea></div></div>
+    <div class="card" style="margin-top:12px"><div class="ch"><h3>Paste Data</h3><button class="btn btn-s btn-p" onclick="parsePaste()">Import</button></div>
+    <div class="cb"><textarea id="paste-d" placeholder="Paste CSV/JSON/tab data..." style="width:100%;min-height:80px;font-family:var(--mono);font-size:.75rem"></textarea></div></div>
   </div>
-  <div id="data-api" class="hidden">
-    <div class="grid-2">
-      <div class="card"><div class="card-header"><h3>Financial Modeling Prep</h3><span class="badge" id="fmp-status">Not Connected</span></div>
-      <div class="card-body">
-        <p style="font-size:.78rem;color:var(--text-2);margin-bottom:8px">Real-time quotes, analyst grades, price targets, financial statements.</p>
-        <div class="form-row"><div class="form-group"><label>Tickers (comma-separated)</label><input id="fmp-tickers" placeholder="AAPL, MSFT, GOOGL" style="width:100%"></div></div>
-        <div class="flex gap-8"><button class="btn btn-sm btn-primary" onclick="fetchFMPData()">Fetch Quotes</button><button class="btn btn-sm" onclick="fetchFMPGrades()">Fetch Grades</button><button class="btn btn-sm" onclick="fetchFMPScreener()">Run Screener</button></div>
-      </div></div>
-      <div class="card"><div class="card-header"><h3>Finnhub</h3><span class="badge" id="fh-status">Not Connected</span></div>
-      <div class="card-body">
-        <p style="font-size:.78rem;color:var(--text-2);margin-bottom:8px">Stock recommendations, company profiles, earnings surprises.</p>
-        <div class="form-row"><div class="form-group"><label>Tickers</label><input id="fh-tickers" placeholder="AAPL, MSFT" style="width:100%"></div></div>
-        <button class="btn btn-sm btn-primary" onclick="fetchFinnhubData()">Fetch Recommendations</button>
-      </div></div>
-      <div class="card"><div class="card-header"><h3>Alpha Vantage</h3><span class="badge" id="av-status">Not Connected</span></div>
-      <div class="card-body">
-        <p style="font-size:.78rem;color:var(--text-2);margin-bottom:8px">Time series, technical indicators, fundamentals.</p>
-        <div class="form-row"><div class="form-group"><label>Ticker</label><input id="av-ticker" placeholder="AAPL" style="width:100%"></div></div>
-        <button class="btn btn-sm btn-primary" onclick="fetchAVData()">Fetch Overview</button>
-      </div></div>
-      <div class="card"><div class="card-header"><h3>Yahoo Finance (Free)</h3><span class="badge badge-green">No Key Needed</span></div>
-      <div class="card-body">
-        <p style="font-size:.78rem;color:var(--text-2);margin-bottom:8px">Basic quotes via CORS proxy. No API key required.</p>
-        <div class="form-row"><div class="form-group"><label>Tickers</label><input id="yahoo-tickers" placeholder="AAPL, MSFT" style="width:100%"></div></div>
-        <button class="btn btn-sm btn-primary" onclick="fetchYahooData()">Fetch Quotes</button>
-      </div></div>
+  <div id="dt-api" class="hidden">
+    <div class="g2">
+      <div class="card"><div class="ch"><h3>FMP</h3></div><div class="cb"><div class="fg"><label>Tickers</label><input id="fmp-t" placeholder="AAPL,MSFT" style="width:100%"></div><div class="flex g8"><button class="btn btn-s btn-p" onclick="fetchFMP()">Quotes</button><button class="btn btn-s" onclick="fetchFMPGrades()">Grades</button></div></div></div>
+      <div class="card"><div class="ch"><h3>Finnhub</h3></div><div class="cb"><div class="fg"><label>Tickers</label><input id="fh-t" placeholder="AAPL,MSFT" style="width:100%"></div><button class="btn btn-s btn-p" onclick="fetchFH()">Recommendations</button></div></div>
+      <div class="card"><div class="ch"><h3>Yahoo (Free)</h3></div><div class="cb"><div class="fg"><label>Tickers</label><input id="yh-t" placeholder="AAPL,MSFT" style="width:100%"></div><button class="btn btn-s btn-p" onclick="fetchYH()">Quotes</button></div></div>
     </div>
   </div>
-  <div id="data-scrape" class="hidden">
-    <div class="card"><div class="card-header"><h3>Web Scrape</h3><button class="btn btn-sm btn-primary" onclick="runScrape()">Scrape</button></div>
-    <div class="card-body">
-      <p style="font-size:.78rem;color:var(--text-2);margin-bottom:12px">Enter a URL containing stock data (tables, JSON endpoints). AI will attempt to extract structured data.</p>
-      <div class="form-group"><label>URL</label><input id="scrape-url" placeholder="https://example.com/stock-data" style="width:100%"></div>
-      <div class="form-group"><label>Instructions for AI (optional)</label><textarea id="scrape-instructions" placeholder="e.g. Extract the table of S&P 500 companies with their ticker, name, sector, and market cap" style="width:100%"></textarea></div>
-      <div id="scrape-results" style="margin-top:12px"></div>
+  <div id="dt-scrape" class="hidden">
+    <div class="card"><div class="ch"><h3>AI Web Scrape</h3><button class="btn btn-s btn-p" onclick="runScrape()">Scrape</button></div><div class="cb">
+      <div class="fg"><label>URL</label><input id="sc-url" placeholder="https://..." style="width:100%"></div>
+      <div class="fg"><label>Instructions</label><textarea id="sc-inst" style="width:100%" placeholder="Extract the stock table..."></textarea></div>
+      <div id="sc-res" style="margin-top:12px"></div>
     </div></div>
   </div>
-  <div id="data-history" class="hidden">
-    <div class="card"><div class="card-body" style="padding:0"><table><thead><tr><th>Date</th><th>Source</th><th>Records</th><th>Status</th></tr></thead>
-    <tbody id="import-history-tbody"></tbody></table></div></div>
-  </div>
-</div>
-
-<!-- UNIVERSE -->
-<div class="page hidden" id="panel-universe">
-  <div class="page-header"><h1>Universe</h1><p>All stocks in the investable universe</p></div>
-  <div class="stat-row">
-    <div class="stat"><div class="stat-val" id="u-count">0</div><div class="stat-label">Stocks</div></div>
-    <div class="stat"><div class="stat-val" id="u-sectors">0</div><div class="stat-label">Sectors</div></div>
-    <div class="stat"><div class="stat-val" id="u-avgpe">0</div><div class="stat-label">Avg P/E</div></div>
-    <div class="stat"><div class="stat-val" id="u-totalmc">0</div><div class="stat-label">Total Mkt Cap</div></div>
-  </div>
-  <div class="toolbar">
-    <input class="search-input" placeholder="Search..." oninput="renderUniverse()" id="u-search">
-    <select id="u-sector" onchange="renderUniverse()"><option value="">All Sectors</option></select>
-    <button class="btn btn-sm" onclick="exportCSV('universe')">Export</button>
-  </div>
-  <div class="card"><div class="card-body" style="padding:0;max-height:480px;overflow-y:auto">
-    <table><thead><tr><th>Ticker</th><th>Name</th><th>Sector</th><th>Mkt Cap</th><th>P/E</th><th>Div Yield</th><th>Price</th><th>Custom</th></tr></thead>
-    <tbody id="universe-tbody"></tbody></table>
-  </div></div>
 </div>
 
 <!-- MACRO -->
 <div class="page hidden" id="panel-macro">
-  <div class="page-header"><h1>Macro Dashboard</h1><p>Market regime and economic indicators</p></div>
-  <div class="stat-row">
-    <div class="stat"><div class="stat-val" id="m-vix">--</div><div class="stat-label">VIX</div></div>
-    <div class="stat"><div class="stat-val" id="m-dxy">--</div><div class="stat-label">DXY</div></div>
-    <div class="stat"><div class="stat-val" id="m-10y">--</div><div class="stat-label">US 10Y</div></div>
-    <div class="stat"><div class="stat-val" id="m-oil">--</div><div class="stat-label">Crude</div></div>
+  <div class="ph"><h1>Macro Dashboard</h1><p>Market indicators</p></div>
+  <div class="sr">
+    <div class="st"><div class="sv" id="m-vix">--</div><div class="sl">VIX</div></div>
+    <div class="st"><div class="sv" id="m-dxy">--</div><div class="sl">DXY</div></div>
+    <div class="st"><div class="sv" id="m-10y">--</div><div class="sl">US 10Y</div></div>
+    <div class="st"><div class="sv" id="m-oil">--</div><div class="sl">Crude</div></div>
   </div>
-  <div class="grid-2">
-    <div class="card"><div class="card-header"><h3>Market Regime</h3></div><div class="card-body" id="regime-body"><div class="empty">Loading...</div></div></div>
-    <div class="card"><div class="card-header"><h3>Yield Curve</h3></div><div class="card-body"><table><thead><tr><th>Tenor</th><th>Yield</th><th>Chg</th></tr></thead><tbody id="yield-tbody"></tbody></table></div></div>
-  </div>
-</div>
-
-</div><!-- /main-scroll -->
-
-<!-- AI CHAT PANE -->
-<div class="chat-pane collapsed" id="chat-pane">
-  <div class="chat-header" onclick="toggleChat()">
-    <h4>AI Assistant</h4>
-    <span style="font-size:.75rem;color:var(--text-3)" id="chat-toggle-label">Click to expand</span>
-  </div>
-  <div class="chat-messages" id="chat-messages">
-    <div class="chat-msg ai"><div class="avatar">AI</div><div class="bubble">I'm your research assistant. Ask me to analyse stocks, explain ratings, compare strategies, generate trade ideas, or build custom screens. I can also help you understand any data on the platform.</div></div>
-  </div>
-  <div class="chat-input-row">
-    <input id="chat-input" placeholder="Ask anything... (e.g. 'Why is AAPL rated Buy?', 'Compare tech vs healthcare')" onkeydown="if(event.key==='Enter')sendChat()">
-    <button class="btn btn-sm btn-primary" onclick="sendChat()">Send</button>
+  <div class="g2">
+    <div class="card"><div class="ch"><h3>Regime</h3></div><div class="cb" id="regime-b"></div></div>
+    <div class="card"><div class="ch"><h3>Yield Curve</h3></div><div class="cb"><table><thead><tr><th>Tenor</th><th>Yield</th><th>Chg</th></tr></thead><tbody id="yc-tbody"></tbody></table></div></div>
   </div>
 </div>
 
-</div><!-- /main -->
-</div><!-- /app -->
+</div><!-- ms -->
+
+<!-- AI CHAT -->
+<div class="cp coll" id="chat">
+  <div class="cph" onclick="togChat()"><h4>AI Research Assistant</h4><span style="font-size:.75rem;color:var(--txt3)" id="ctl">Expand</span></div>
+  <div class="cms" id="cms"><div class="cm a"><div class="av">AI</div><div class="bl">I can help you create theses, analyse signals, explain why stocks fit, run backtests, or suggest ideas. What would you like to do?</div></div></div>
+  <div class="cir"><input id="ci" placeholder="e.g. 'Create a thesis based on Goldman upgrades'" onkeydown="if(event.key==='Enter')chat()"><button class="btn btn-s btn-p" onclick="chat()">Send</button></div>
+</div>
+</div>
+</div>
 
 <script>
-// ═══════════════════════════════════════════
-//  CORE STATE
-// ═══════════════════════════════════════════
-const S = {
-  universe: [],
-  signals: [],
-  trades: [],
-  strategies: [],
-  activeStrategy: null,
-  etfs: [],
-  activeETF: null,
-  ratings: {},        // keyed by strategy id
-  importHistory: [],
-  backtestHistory: [],
-  keys: { ai:'', fmp:'', finnhub:'', av:'' },
-  chatHistory: []
+// ═══════ STATE ═══════
+const D={
+  universe:[],signals:[],theses:[],etfs:[],activeETF:null,auditLog:[],
+  keys:{ai:'',fmp:'',fh:''}
 };
-
-// ═══════════════════════════════════════════
-//  HELPERS
-// ═══════════════════════════════════════════
-const rnd=(a,b)=>+(a+Math.random()*(b-a)).toFixed(2);
-const rndI=(a,b)=>Math.floor(a+Math.random()*(b-a+1));
-const pick=a=>a[rndI(0,a.length-1)];
-const gid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
-const clamp=(v,lo,hi)=>Math.min(hi,Math.max(lo,v));
-const fN=(n,d=1)=>{if(n==null)return'--';if(Math.abs(n)>=1e12)return(n/1e12).toFixed(d)+'T';if(Math.abs(n)>=1e9)return(n/1e9).toFixed(d)+'B';if(Math.abs(n)>=1e6)return(n/1e6).toFixed(d)+'M';return n.toFixed?n.toFixed(d):n};
+// ═══════ HELPERS ═══════
+const rnd=(a,b)=>+(a+Math.random()*(b-a)).toFixed(2),rI=(a,b)=>Math.floor(a+Math.random()*(b-a+1)),pick=a=>a[rI(0,a.length-1)],gid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6),clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+const fN=(n,d=1)=>n==null?'--':Math.abs(n)>=1e12?(n/1e12).toFixed(d)+'T':Math.abs(n)>=1e9?(n/1e9).toFixed(d)+'B':Math.abs(n)>=1e6?(n/1e6).toFixed(d)+'M':n.toFixed?n.toFixed(d):n;
 const fP=(n,d=1)=>n==null?'--':(n>=0?'+':'')+n.toFixed(d)+'%';
-const fD=d=>d.toISOString().split('T')[0];
-const today=()=>fD(new Date());
+const today=()=>new Date().toISOString().split('T')[0];
+const now=()=>new Date().toISOString().replace('T',' ').slice(0,19);
+function toast(m,t='info'){const c=document.getElementById('toasts'),d=document.createElement('div');d.className='toast t'+t[0];d.textContent=m;c.appendChild(d);setTimeout(()=>d.remove(),3500)}
+function log(type,action,detail,user='Analyst'){D.auditLog.unshift({ts:now(),type,action,detail,user});renderDash()}
 
-function toast(msg,type='info'){const c=document.getElementById('toasts'),d=document.createElement('div');d.className=`toast toast-${type}`;d.textContent=msg;c.appendChild(d);setTimeout(()=>d.remove(),3500)}
-
-// ═══════════════════════════════════════════
-//  DEMO DATA
-// ═══════════════════════════════════════════
+// ═══════ DATA ═══════
 const SECTORS=['Technology','Healthcare','Financials','Consumer Discretionary','Industrials','Energy','Materials','Utilities','Real Estate','Communication Services','Consumer Staples'];
 const ANALYSTS=['Goldman Sachs','Morgan Stanley','JP Morgan','BofA','Citi','UBS','Barclays','Deutsche Bank','HSBC','Wells Fargo','Jefferies','RBC','Piper Sandler'];
 const TICKERS=[
-{t:'AAPL',n:'Apple Inc',s:'Technology',mc:3200,pe:31.2,dy:0.5,p:215},{t:'MSFT',n:'Microsoft',s:'Technology',mc:3100,pe:35.4,dy:0.7,p:430},
+{t:'AAPL',n:'Apple',s:'Technology',mc:3200,pe:31.2,dy:.5,p:215},{t:'MSFT',n:'Microsoft',s:'Technology',mc:3100,pe:35.4,dy:.7,p:430},
 {t:'GOOGL',n:'Alphabet',s:'Communication Services',mc:2100,pe:25.8,dy:0,p:175},{t:'AMZN',n:'Amazon',s:'Consumer Discretionary',mc:2000,pe:58.2,dy:0,p:192},
-{t:'NVDA',n:'NVIDIA',s:'Technology',mc:2800,pe:62.5,dy:0.03,p:880},{t:'META',n:'Meta Platforms',s:'Communication Services',mc:1400,pe:27.3,dy:0.3,p:520},
-{t:'TSLA',n:'Tesla',s:'Consumer Discretionary',mc:800,pe:68.4,dy:0,p:248},{t:'BRK.B',n:'Berkshire Hathaway',s:'Financials',mc:900,pe:10.2,dy:0,p:420},
-{t:'JPM',n:'JPMorgan Chase',s:'Financials',mc:620,pe:12.8,dy:2.3,p:205},{t:'V',n:'Visa',s:'Financials',mc:580,pe:30.5,dy:0.7,p:280},
-{t:'JNJ',n:'Johnson & Johnson',s:'Healthcare',mc:420,pe:15.2,dy:2.9,p:162},{t:'UNH',n:'UnitedHealth',s:'Healthcare',mc:480,pe:22.1,dy:1.4,p:520},
-{t:'XOM',n:'Exxon Mobil',s:'Energy',mc:480,pe:13.5,dy:3.2,p:115},{t:'PG',n:'Procter & Gamble',s:'Consumer Staples',mc:390,pe:26.8,dy:2.4,p:165},
-{t:'MA',n:'Mastercard',s:'Financials',mc:430,pe:34.2,dy:0.5,p:460},{t:'HD',n:'Home Depot',s:'Consumer Discretionary',mc:370,pe:24.1,dy:2.5,p:355},
+{t:'NVDA',n:'NVIDIA',s:'Technology',mc:2800,pe:62.5,dy:.03,p:880},{t:'META',n:'Meta',s:'Communication Services',mc:1400,pe:27.3,dy:.3,p:520},
+{t:'TSLA',n:'Tesla',s:'Consumer Discretionary',mc:800,pe:68.4,dy:0,p:248},{t:'BRK.B',n:'Berkshire',s:'Financials',mc:900,pe:10.2,dy:0,p:420},
+{t:'JPM',n:'JPMorgan',s:'Financials',mc:620,pe:12.8,dy:2.3,p:205},{t:'V',n:'Visa',s:'Financials',mc:580,pe:30.5,dy:.7,p:280},
+{t:'JNJ',n:'J&J',s:'Healthcare',mc:420,pe:15.2,dy:2.9,p:162},{t:'UNH',n:'UnitedHealth',s:'Healthcare',mc:480,pe:22.1,dy:1.4,p:520},
+{t:'XOM',n:'Exxon',s:'Energy',mc:480,pe:13.5,dy:3.2,p:115},{t:'PG',n:'P&G',s:'Consumer Staples',mc:390,pe:26.8,dy:2.4,p:165},
+{t:'MA',n:'Mastercard',s:'Financials',mc:430,pe:34.2,dy:.5,p:460},{t:'HD',n:'Home Depot',s:'Consumer Discretionary',mc:370,pe:24.1,dy:2.5,p:355},
 {t:'CVX',n:'Chevron',s:'Energy',mc:310,pe:14.8,dy:3.8,p:158},{t:'MRK',n:'Merck',s:'Healthcare',mc:280,pe:16.4,dy:2.6,p:125},
-{t:'ABBV',n:'AbbVie',s:'Healthcare',mc:310,pe:18.2,dy:3.5,p:175},{t:'LLY',n:'Eli Lilly',s:'Healthcare',mc:750,pe:82.5,dy:0.7,p:790},
-{t:'COST',n:'Costco',s:'Consumer Staples',mc:350,pe:48.5,dy:0.5,p:780},{t:'AVGO',n:'Broadcom',s:'Technology',mc:700,pe:32.8,dy:1.3,p:168},
-{t:'PEP',n:'PepsiCo',s:'Consumer Staples',mc:230,pe:24.5,dy:2.7,p:170},{t:'KO',n:'Coca-Cola',s:'Consumer Staples',mc:265,pe:25.2,dy:3.0,p:62},
-{t:'TMO',n:'Thermo Fisher',s:'Healthcare',mc:210,pe:28.4,dy:0.2,p:530},{t:'WMT',n:'Walmart',s:'Consumer Staples',mc:480,pe:30.2,dy:1.3,p:170},
-{t:'ACN',n:'Accenture',s:'Technology',mc:210,pe:28.5,dy:1.5,p:330},{t:'MCD',n:"McDonald's",s:'Consumer Discretionary',mc:210,pe:25.8,dy:2.2,p:290},
-{t:'DHR',n:'Danaher',s:'Healthcare',mc:180,pe:30.1,dy:0.4,p:250},{t:'ADBE',n:'Adobe',s:'Technology',mc:240,pe:38.2,dy:0,p:510},
-{t:'CRM',n:'Salesforce',s:'Technology',mc:270,pe:42.1,dy:0.5,p:280},{t:'NKE',n:'Nike',s:'Consumer Discretionary',mc:145,pe:28.5,dy:1.5,p:92},
-{t:'INTC',n:'Intel',s:'Technology',mc:110,pe:0,dy:1.2,p:28},{t:'DIS',n:'Walt Disney',s:'Communication Services',mc:195,pe:35.2,dy:0.8,p:108},
-{t:'VZ',n:'Verizon',s:'Communication Services',mc:170,pe:9.8,dy:6.2,p:42},{t:'PM',n:'Philip Morris',s:'Consumer Staples',mc:190,pe:18.2,dy:4.8,p:118},
-{t:'NEE',n:'NextEra Energy',s:'Utilities',mc:150,pe:22.4,dy:2.6,p:76},{t:'RTX',n:'RTX Corp',s:'Industrials',mc:155,pe:20.1,dy:2.1,p:115},
-{t:'HON',n:'Honeywell',s:'Industrials',mc:140,pe:22.8,dy:2.0,p:205},{t:'UNP',n:'Union Pacific',s:'Industrials',mc:150,pe:23.5,dy:2.1,p:235},
-{t:'GE',n:'GE Aerospace',s:'Industrials',mc:195,pe:32.4,dy:0.6,p:175},{t:'CAT',n:'Caterpillar',s:'Industrials',mc:175,pe:17.2,dy:1.6,p:340},
-{t:'BA',n:'Boeing',s:'Industrials',mc:130,pe:0,dy:0,p:178},{t:'GS',n:'Goldman Sachs',s:'Financials',mc:155,pe:14.5,dy:2.3,p:475},
-{t:'BLK',n:'BlackRock',s:'Financials',mc:140,pe:21.8,dy:2.2,p:850},{t:'SPGI',n:'S&P Global',s:'Financials',mc:150,pe:38.2,dy:0.7,p:450},
-{t:'AMT',n:'American Tower',s:'Real Estate',mc:95,pe:42.5,dy:3.0,p:198},{t:'PLD',n:'Prologis',s:'Real Estate',mc:110,pe:55.2,dy:3.2,p:118},
-{t:'SHW',n:'Sherwin-Williams',s:'Materials',mc:85,pe:32.5,dy:0.8,p:340},{t:'LIN',n:'Linde',s:'Materials',mc:210,pe:28.8,dy:1.2,p:460}
+{t:'ABBV',n:'AbbVie',s:'Healthcare',mc:310,pe:18.2,dy:3.5,p:175},{t:'LLY',n:'Eli Lilly',s:'Healthcare',mc:750,pe:82.5,dy:.7,p:790},
+{t:'COST',n:'Costco',s:'Consumer Staples',mc:350,pe:48.5,dy:.5,p:780},{t:'AVGO',n:'Broadcom',s:'Technology',mc:700,pe:32.8,dy:1.3,p:168},
+{t:'PEP',n:'PepsiCo',s:'Consumer Staples',mc:230,pe:24.5,dy:2.7,p:170},{t:'KO',n:'Coca-Cola',s:'Consumer Staples',mc:265,pe:25.2,dy:3,p:62},
+{t:'WMT',n:'Walmart',s:'Consumer Staples',mc:480,pe:30.2,dy:1.3,p:170},{t:'ACN',n:'Accenture',s:'Technology',mc:210,pe:28.5,dy:1.5,p:330},
+{t:'CRM',n:'Salesforce',s:'Technology',mc:270,pe:42.1,dy:.5,p:280},{t:'ADBE',n:'Adobe',s:'Technology',mc:240,pe:38.2,dy:0,p:510},
+{t:'CAT',n:'Caterpillar',s:'Industrials',mc:175,pe:17.2,dy:1.6,p:340},{t:'GS',n:'Goldman Sachs',s:'Financials',mc:155,pe:14.5,dy:2.3,p:475},
+{t:'BLK',n:'BlackRock',s:'Financials',mc:140,pe:21.8,dy:2.2,p:850},{t:'LIN',n:'Linde',s:'Materials',mc:210,pe:28.8,dy:1.2,p:460},
+{t:'NEE',n:'NextEra',s:'Utilities',mc:150,pe:22.4,dy:2.6,p:76},{t:'RTX',n:'RTX',s:'Industrials',mc:155,pe:20.1,dy:2.1,p:115},
+{t:'GE',n:'GE Aerospace',s:'Industrials',mc:195,pe:32.4,dy:.6,p:175},{t:'BA',n:'Boeing',s:'Industrials',mc:130,pe:0,dy:0,p:178},
+{t:'PLD',n:'Prologis',s:'Real Estate',mc:110,pe:55.2,dy:3.2,p:118},{t:'AMT',n:'American Tower',s:'Real Estate',mc:95,pe:42.5,dy:3,p:198},
+{t:'DIS',n:'Disney',s:'Communication Services',mc:195,pe:35.2,dy:.8,p:108},{t:'VZ',n:'Verizon',s:'Communication Services',mc:170,pe:9.8,dy:6.2,p:42},
+{t:'PM',n:'Philip Morris',s:'Consumer Staples',mc:190,pe:18.2,dy:4.8,p:118},{t:'SHW',n:'Sherwin-Williams',s:'Materials',mc:85,pe:32.5,dy:.8,p:340},
+{t:'HON',n:'Honeywell',s:'Industrials',mc:140,pe:22.8,dy:2,p:205},{t:'UNP',n:'Union Pacific',s:'Industrials',mc:150,pe:23.5,dy:2.1,p:235},
+{t:'NKE',n:'Nike',s:'Consumer Discretionary',mc:145,pe:28.5,dy:1.5,p:92},{t:'INTC',n:'Intel',s:'Technology',mc:110,pe:0,dy:1.2,p:28},
+{t:'TMO',n:'Thermo Fisher',s:'Healthcare',mc:210,pe:28.4,dy:.2,p:530},{t:'DHR',n:'Danaher',s:'Healthcare',mc:180,pe:30.1,dy:.4,p:250},
+{t:'SPGI',n:'S&P Global',s:'Financials',mc:150,pe:38.2,dy:.7,p:450},{t:'MCD',n:"McDonald's",s:'Consumer Discretionary',mc:210,pe:25.8,dy:2.2,p:290}
 ];
 
-const FACTOR_CATALOG = [
-  {id:'analyst_rating',label:'Analyst Rating',desc:'Consensus analyst buy/sell/hold (filtered by strategy)',category:'Sentiment',score:(s,strat)=>{
-    let sigs=S.signals.filter(x=>x.ticker===s.t);
-    if(strat?.analysts?.length)sigs=sigs.filter(x=>strat.analysts.includes(x.analyst));
-    if(strat?.signalTypes?.length)sigs=sigs.filter(x=>strat.signalTypes.includes(x.type));
-    const ups=sigs.filter(x=>['upgrade','initiation','pt_raise'].includes(x.type)).length;
-    const downs=sigs.filter(x=>['downgrade','pt_cut'].includes(x.type)).length;
-    return clamp(50+(ups-downs)*15,0,100)}},
-  {id:'valuation',label:'Valuation (P/E)',desc:'Lower P/E scores higher',category:'Fundamental',score:(s)=>s.pe>0?clamp(100-s.pe*1.5,0,100):50},
-  {id:'dividend',label:'Dividend Yield',desc:'Higher yield scores higher',category:'Fundamental',score:(s)=>clamp(s.dy*20,0,100)},
-  {id:'market_cap',label:'Market Cap Quality',desc:'Larger cap = higher quality',category:'Fundamental',score:(s)=>clamp(Math.log10(s.mc)*20,0,100)},
-  {id:'momentum',label:'Price Momentum',desc:'Positive momentum scores higher',category:'Technical',score:(s)=>clamp(50+s.momentum*2,0,100)},
-  {id:'rsi',label:'RSI',desc:'Neither overbought nor oversold',category:'Technical',score:(s)=>s.rsi>70?30:s.rsi<30?30:70},
-  {id:'z_score',label:'Z-Score',desc:'Statistical deviation from mean',category:'Quantitative',score:(s)=>clamp(50+s.z*15,0,100)},
-  {id:'quality',label:'Quality Composite',desc:'Balance sheet strength + earnings stability',category:'Fundamental',score:(s)=>clamp(50+(s.mc>200?15:0)+(s.pe>0&&s.pe<25?15:0)+(s.dy>1?10:0),0,100)},
-  {id:'growth',label:'Growth',desc:'Revenue and earnings growth signals',category:'Fundamental',score:(s)=>clamp(50+(s.pe>30?-10:10)+s.momentum,0,100)},
-  {id:'volatility',label:'Low Volatility',desc:'Lower beta preferred',category:'Risk',score:(s)=>clamp(100-s.beta*40,0,100)},
-  {id:'size',label:'Size Factor (SMB)',desc:'Smaller companies may outperform',category:'Quantitative',score:(s)=>clamp(100-Math.log10(s.mc)*15,0,100)},
-  {id:'value',label:'Deep Value',desc:'Combined P/E + dividend + book value',category:'Fundamental',score:(s)=>clamp((s.pe>0?Math.max(0,35-s.pe)*2:0)+s.dy*10,0,100)},
-];
+function initU(){D.universe=TICKERS.map(t=>({...t,id:gid(),z:rnd(-2.5,2.5),beta:rnd(.6,1.8),rsi:rI(20,80),mom:rnd(-15,25)}));
+  const s=document.getElementById('u-sec');SECTORS.forEach(x=>s.innerHTML+=`<option>${x}</option>`);
+  const sa=document.getElementById('s-analyst');ANALYSTS.forEach(x=>sa.innerHTML+=`<option>${x}</option>`);}
 
-// ═══════════════════════════════════════════
-//  NAVIGATION
-// ═══════════════════════════════════════════
-const PANELS=['strategies','ratings','signals','trades','pm','etfs','optimizer','compliance','backtest','datahub','universe','macro'];
-function nav(id){
-  PANELS.forEach(p=>{document.getElementById('panel-'+p)?.classList.toggle('hidden',p!==id);document.getElementById('nav-'+p)?.classList.toggle('active',p===id)});
-  if(id==='ratings')renderRatings();if(id==='signals')renderSignals();if(id==='trades')renderTrades();
-  if(id==='pm')renderPM();if(id==='etfs')renderETF();if(id==='universe')renderUniverse();if(id==='macro')loadMacro();
-  if(id==='strategies')renderStrategies();
+function initSig(){
+  const types=['upgrade','downgrade','initiation','pt_raise','pt_cut'],rats=['Buy','Overweight','Equal-weight','Underweight','Sell','Outperform','Neutral'];
+  for(let i=0;i<80;i++){const stk=pick(TICKERS),tp=pick(types),d=new Date();d.setDate(d.getDate()-rI(0,45));
+    D.signals.push({id:gid(),date:d.toISOString().split('T')[0],ticker:stk.t,name:stk.n,sector:stk.s,type:tp,analyst:pick(ANALYSTS),from:pick(rats),to:pick(rats),pt:tp.includes('pt')?rI(80,500):null})}
+  D.signals.sort((a,b)=>b.date.localeCompare(a.date));
 }
 
-// ═══════════════════════════════════════════
-//  STRATEGIES
-// ═══════════════════════════════════════════
-function createDefaultStrategies(){
-  S.strategies=[
-    {id:gid(),name:'Value Momentum',desc:'Combines valuation metrics with price momentum for alpha generation',factors:[{id:'valuation',weight:30},{id:'momentum',weight:25},{id:'dividend',weight:20},{id:'quality',weight:15},{id:'analyst_rating',weight:10}],filters:{minMC:10,maxPE:35,minDY:0,sectors:[]},autoRun:true,color:'var(--primary)'},
-    {id:gid(),name:'Quality Growth',desc:'Targets high-quality companies with strong growth trajectories',factors:[{id:'quality',weight:30},{id:'growth',weight:25},{id:'market_cap',weight:20},{id:'momentum',weight:15},{id:'volatility',weight:10}],filters:{minMC:50,maxPE:60,minDY:0,sectors:[]},autoRun:true,color:'var(--green)'},
-    {id:gid(),name:'Dividend Aristocrats',desc:'Income-focused strategy targeting high and stable dividends',factors:[{id:'dividend',weight:40},{id:'quality',weight:25},{id:'valuation',weight:20},{id:'volatility',weight:15}],filters:{minMC:20,maxPE:30,minDY:2,sectors:[]},autoRun:true,color:'var(--gold)'},
-    {id:gid(),name:'Analyst Consensus',desc:'Weights primarily on analyst ratings and price target changes',factors:[{id:'analyst_rating',weight:50},{id:'momentum',weight:20},{id:'z_score',weight:15},{id:'quality',weight:15}],filters:{minMC:10,maxPE:0,minDY:0,sectors:[]},analysts:[],autoRun:true,color:'var(--purple)'},
-    {id:gid(),name:'Goldman Alpha',desc:'Follow Goldman Sachs upgrades and initiations only',factors:[{id:'analyst_rating',weight:60},{id:'quality',weight:20},{id:'momentum',weight:20}],filters:{minMC:50,maxPE:0,minDY:0,sectors:[]},analysts:['Goldman Sachs'],signalTypes:['upgrade','initiation'],autoRun:true,color:'var(--orange)'},
-  ];
-  S.activeStrategy=S.strategies[0].id;
+// ═══════ NAV ═══════
+const PANELS=['dash','theses','universe','etfs','review','audit','data','macro'];
+function nav(id){PANELS.forEach(p=>{document.getElementById('panel-'+p)?.classList.toggle('hidden',p!==id);document.getElementById('nav-'+p)?.classList.toggle('active',p===id)});
+  if(id==='dash')renderDash();if(id==='universe'){renderU();renderS()}if(id==='theses')renderTheses();if(id==='etfs')renderETF();if(id==='review')renderReview();if(id==='audit')renderAudit();if(id==='macro')loadMacro();}
+
+function showUT(t){['stocks','signals'].forEach(x=>{document.getElementById('ut-'+x)?.classList.toggle('hidden',x!==t)});document.querySelectorAll('#panel-universe .tab').forEach((el,i)=>el.classList.toggle('active',['stocks','signals'][i]===t))}
+function showDT(t){['upload','api','scrape'].forEach(x=>{document.getElementById('dt-'+x)?.classList.toggle('hidden',x!==t)});document.querySelectorAll('#panel-data .tab').forEach((el,i)=>el.classList.toggle('active',['upload','api','scrape'][i]===t))}
+
+// ═══════ DASHBOARD ═══════
+function renderDash(){
+  document.getElementById('d-theses').textContent=D.theses.length;
+  document.getElementById('d-etfs').textContent=D.etfs.length;
+  document.getElementById('d-pending').textContent=D.etfs.filter(e=>e.status==='submitted').length;
+  document.getElementById('d-stocks').textContent=D.universe.length;
+  const act=D.auditLog.slice(0,15);
+  document.getElementById('d-activity').innerHTML=act.length?act.map(a=>`<div class="audit"><b>${a.ts}</b> [${a.type}] ${a.action}: ${a.detail}</div>`).join(''):'<div class="empty">No activity yet.</div>';
 }
 
-function renderStrategies(){
-  document.getElementById('active-strategy-name').textContent=getActiveStrategy()?.name||'--';
-  const grid=document.getElementById('strategy-grid');
-  grid.innerHTML=S.strategies.map(s=>{
-    const factorChips=s.factors.map(f=>{const cat=FACTOR_CATALOG.find(c=>c.id===f.id);return`<span class="factor-chip">${cat?.label||f.id} ${f.weight}%</span>`}).join('');
-    const filterText=[];if(s.filters.minMC>0)filterText.push('Cap>$'+s.filters.minMC+'B');if(s.filters.maxPE>0)filterText.push('P/E<'+s.filters.maxPE);if(s.filters.minDY>0)filterText.push('Div>'+s.filters.minDY+'%');if(s.analysts?.length)filterText.push(s.analysts.length+' analyst'+(s.analysts.length>1?'s':''));if(s.signalTypes?.length)filterText.push(s.signalTypes.join('/'));
-    return`<div class="strategy-card ${S.activeStrategy===s.id?'active':''}" onclick="activateStrategy('${s.id}')">
-      <div class="flex justify-between items-center"><h4 style="color:${s.color}">${s.name}</h4><div class="flex gap-4"><button class="btn-icon" onclick="event.stopPropagation();editStrategy('${s.id}')" title="Edit">E</button><button class="btn-icon" onclick="event.stopPropagation();deleteStrategy('${s.id}')" title="Delete">x</button></div></div>
-      <p>${s.desc}</p>
-      <div style="margin-bottom:6px">${factorChips}</div>
-      <div style="font-size:.7rem;color:var(--text-3)">${filterText.join(' · ')||'No filters'} ${s.autoRun?'· Auto-score':''}  </div>
-      ${S.activeStrategy===s.id?'<div style="margin-top:6px"><span class="badge badge-blue">Active</span></div>':''}
-    </div>`}).join('');
-  // Update rating strategy dropdown
-  const sel=document.getElementById('rating-strategy');
-  sel.innerHTML=S.strategies.map(s=>`<option value="${s.id}" ${s.id===S.activeStrategy?'selected':''}>${s.name}</option>`).join('');
+// ═══════ THESES ═══════
+function renderTheses(){
+  const list=document.getElementById('theses-list');
+  list.innerHTML=D.theses.length?D.theses.map(th=>{
+    const sigCount=D.signals.filter(s=>{
+      if(th.signalTypes.length&&!th.signalTypes.includes(s.type))return false;
+      if(th.analysts.length&&!th.analysts.includes(s.analyst))return false;return true}).length;
+    return`<div class="card" style="margin-bottom:12px"><div class="ch"><h3>${th.name}</h3><div class="flex g8">
+      <span class="badge ${th.backtested?'bg':'bo'}">${th.backtested?'Backtested':'Not Tested'}</span>
+      ${th.etfId?'<span class="badge bb">ETF Created</span>':''}
+    </div></div><div class="cb">
+      <p style="font-size:.82rem;margin-bottom:8px">${th.description}</p>
+      <div style="font-size:.75rem;color:var(--txt2);margin-bottom:8px">
+        <b>Analysts:</b> ${th.analysts.length?th.analysts.join(', '):'All'} · <b>Signals:</b> ${th.signalTypes.join(', ')||'All'} · <b>Hold:</b> ${th.holdDays}d · <b>Matching signals:</b> ${sigCount}
+        ${th.filters.minMC?' · <b>Min Cap:</b> $'+th.filters.minMC+'B':''}${th.filters.maxPE?' · <b>Max P/E:</b> '+th.filters.maxPE:''}${th.filters.minDY?' · <b>Min Div:</b> '+th.filters.minDY+'%':''}
+      </div>
+      ${th.backtestResult?`<div class="sr" style="margin-bottom:8px"><div class="st"><div class="sv ${th.backtestResult.ret>=0?'pos':'neg'}">${fP(th.backtestResult.ret)}</div><div class="sl">Return</div></div><div class="st"><div class="sv ${th.backtestResult.alpha>=0?'pos':'neg'}">${fP(th.backtestResult.alpha)}</div><div class="sl">Alpha</div></div><div class="st"><div class="sv">${th.backtestResult.sharpe}</div><div class="sl">Sharpe</div></div><div class="st"><div class="sv neg">${th.backtestResult.maxDD.toFixed(1)}%</div><div class="sl">Max DD</div></div></div>`:''}
+      <div class="flex g8">
+        ${!th.backtested?`<button class="btn btn-s btn-p" onclick="backtestThesis('${th.id}')">Run Backtest</button>`:''}
+        ${!th.etfId?`<button class="btn btn-s btn-g" onclick="createETFFromThesis('${th.id}')">Create ETF</button>`:`<button class="btn btn-s" onclick="D.activeETF='${th.etfId}';nav('etfs')">View ETF</button>`}
+        <button class="btn btn-s" onclick="deleteThesis('${th.id}')">Delete</button>
+      </div>
+    </div></div>`}).join(''):'<div class="empty">No theses yet. Click "New Thesis" to define your first investment thesis.</div>';
 }
 
-function getActiveStrategy(){return S.strategies.find(s=>s.id===S.activeStrategy)}
-function activateStrategy(id){S.activeStrategy=id;runAutoScore();renderStrategies();toast('Strategy activated: '+getActiveStrategy()?.name,'success')}
-function switchRatingStrategy(){S.activeStrategy=document.getElementById('rating-strategy').value;runAutoScore();renderStrategies()}
-function deleteStrategy(id){if(S.strategies.length<=1){toast('Need at least one strategy','error');return}S.strategies=S.strategies.filter(s=>s.id!==id);if(S.activeStrategy===id)S.activeStrategy=S.strategies[0].id;renderStrategies();toast('Strategy deleted','info')}
-function duplicateStrategy(){const a=getActiveStrategy();if(!a)return;const n={...JSON.parse(JSON.stringify(a)),id:gid(),name:a.name+' (Copy)'};S.strategies.push(n);renderStrategies();toast('Strategy duplicated','success')}
-
-function openNewStrategy(){showModal('New Strategy',`
-  <div class="form-group"><label>Name</label><input id="ns-name" placeholder="e.g. Deep Value" style="width:100%"></div>
-  <div class="form-group"><label>Description</label><textarea id="ns-desc" placeholder="Strategy description..." style="width:100%"></textarea></div>
-  <div class="form-group"><label>Factors (select and set weights)</label>
-    <div id="ns-factors">${FACTOR_CATALOG.map(f=>`<div class="flex items-center gap-8" style="margin-bottom:4px"><label style="width:160px;font-size:.78rem"><input type="checkbox" value="${f.id}" class="ns-factor-cb"> ${f.label}</label><input type="number" class="ns-factor-wt" data-id="${f.id}" value="0" min="0" max="100" step="5" style="width:60px" disabled><span style="font-size:.7rem;color:var(--text-3)">% · ${f.category}</span></div>`).join('')}</div>
-  </div>
-  <div class="form-row"><div class="form-group"><label>Min Market Cap ($B)</label><input type="number" id="ns-minmc" value="0"></div><div class="form-group"><label>Max P/E (0=any)</label><input type="number" id="ns-maxpe" value="0"></div><div class="form-group"><label>Min Div Yield %</label><input type="number" id="ns-mindy" value="0" step="0.1"></div></div>
-  <div class="form-group"><label><input type="checkbox" id="ns-auto" checked> Auto-score on activation</label></div>
-`,()=>{
-  const name=document.getElementById('ns-name').value.trim();if(!name){toast('Name required','error');return}
-  const factors=[];document.querySelectorAll('.ns-factor-cb:checked').forEach(cb=>{const wt=+document.querySelector(`.ns-factor-wt[data-id="${cb.value}"]`).value;if(wt>0)factors.push({id:cb.value,weight:wt})});
-  if(!factors.length){toast('Select at least one factor','error');return}
-  const total=factors.reduce((a,f)=>a+f.weight,0);if(total!==100){toast('Factor weights must sum to 100% (currently '+total+'%)','error');return}
-  const analysts=[];document.querySelectorAll('.ns-analyst-cb:checked').forEach(cb=>analysts.push(cb.value));
-  const sigTypes=[];document.querySelectorAll('.ns-sigtype:checked').forEach(cb=>sigTypes.push(cb.value));
-  const strat={id:gid(),name,desc:document.getElementById('ns-desc').value,factors,filters:{minMC:+document.getElementById('ns-minmc').value,maxPE:+document.getElementById('ns-maxpe').value,minDY:+document.getElementById('ns-mindy').value,sectors:[]},analysts,signalTypes:sigTypes,autoRun:document.getElementById('ns-auto').checked,color:['var(--primary)','var(--green)','var(--gold)','var(--purple)','var(--blue)','var(--orange)'][S.strategies.length%6]};
-  S.strategies.push(strat);activateStrategy(strat.id);closeModal();toast('Strategy created: '+name,'success');
-});
-  // Wire checkbox → enable weight input
-  setTimeout(()=>{document.querySelectorAll('.ns-factor-cb').forEach(cb=>{cb.onchange=()=>{const wt=document.querySelector(`.ns-factor-wt[data-id="${cb.value}"]`);wt.disabled=!cb.checked;if(!cb.checked)wt.value=0}})},50);
-}
-
-function editStrategy(id){
-  const s=S.strategies.find(x=>x.id===id);if(!s)return;
-  const factorSet=new Set(s.factors.map(f=>f.id));
-  const factorWeights={};s.factors.forEach(f=>factorWeights[f.id]=f.weight);
-  showModal('Edit: '+s.name,`
-    <div class="form-group"><label>Name</label><input id="es-name" value="${s.name}" style="width:100%"></div>
-    <div class="form-group"><label>Description</label><textarea id="es-desc" style="width:100%">${s.desc||''}</textarea></div>
-    <div class="form-group"><label>Factors</label>
-      <div id="es-factors">${FACTOR_CATALOG.map(f=>`<div class="flex items-center gap-8" style="margin-bottom:4px"><label style="width:160px;font-size:.78rem"><input type="checkbox" value="${f.id}" class="es-factor-cb" ${factorSet.has(f.id)?'checked':''}> ${f.label}</label><input type="number" class="es-factor-wt" data-id="${f.id}" value="${factorWeights[f.id]||0}" min="0" max="100" step="5" style="width:60px" ${factorSet.has(f.id)?'':'disabled'}><span style="font-size:.7rem;color:var(--text-3)">%</span></div>`).join('')}</div>
-    </div>
-    <div class="form-row"><div class="form-group"><label>Min MC ($B)</label><input type="number" id="es-minmc" value="${s.filters.minMC}"></div><div class="form-group"><label>Max P/E</label><input type="number" id="es-maxpe" value="${s.filters.maxPE}"></div><div class="form-group"><label>Min DY %</label><input type="number" id="es-mindy" value="${s.filters.minDY}" step="0.1"></div></div>
+function openNewThesis(){
+  showMod('New Investment Thesis',`
+    <div class="fg"><label>Thesis Name</label><input id="tn" placeholder="e.g. Follow Goldman Upgrades" style="width:100%"></div>
+    <div class="fg"><label>Description — what do you believe and why?</label><textarea id="td" style="width:100%;min-height:80px" placeholder="e.g. Stocks upgraded by Goldman Sachs outperform the market over 90 days because their research team has consistently strong track records in large-cap equities."></textarea></div>
+    <div class="fg"><label>Which analysts to follow? (blank = all)</label>
+      <div style="max-height:120px;overflow-y:auto;border:1px solid var(--bdr);border-radius:var(--r);padding:6px">${ANALYSTS.map(a=>`<label style="display:inline-block;font-size:.78rem;margin-right:8px"><input type="checkbox" value="${a}" class="nt-a"> ${a}</label>`).join('')}</div></div>
+    <div class="fg"><label>Signal types</label><div class="flex g8 fw">
+      <label style="font-size:.78rem"><input type="checkbox" value="upgrade" class="nt-st" checked> Upgrades</label>
+      <label style="font-size:.78rem"><input type="checkbox" value="initiation" class="nt-st"> Initiations</label>
+      <label style="font-size:.78rem"><input type="checkbox" value="pt_raise" class="nt-st"> PT Raises</label>
+      <label style="font-size:.78rem"><input type="checkbox" value="downgrade" class="nt-st"> Downgrades (contrarian)</label>
+    </div></div>
+    <div class="fr"><div class="fg"><label>Hold Period (days)</label><input type="number" id="th-hold" value="90"></div><div class="fg"><label>Min Mkt Cap ($B)</label><input type="number" id="th-mc" value="10"></div><div class="fg"><label>Max P/E (0=any)</label><input type="number" id="th-pe" value="0"></div><div class="fg"><label>Min Div%</label><input type="number" id="th-dy" value="0" step=".1"></div></div>
   `,()=>{
-    const factors=[];document.querySelectorAll('.es-factor-cb:checked').forEach(cb=>{const wt=+document.querySelector(`.es-factor-wt[data-id="${cb.value}"]`).value;if(wt>0)factors.push({id:cb.value,weight:wt})});
-    const total=factors.reduce((a,f)=>a+f.weight,0);if(total!==100){toast('Weights must sum to 100% ('+total+'%)','error');return}
-    s.name=document.getElementById('es-name').value;s.desc=document.getElementById('es-desc').value;
-    s.factors=factors;s.filters={minMC:+document.getElementById('es-minmc').value,maxPE:+document.getElementById('es-maxpe').value,minDY:+document.getElementById('es-mindy').value,sectors:[]};
-    closeModal();runAutoScore();renderStrategies();toast('Strategy updated','success');
+    const name=document.getElementById('tn').value.trim();if(!name){toast('Name required','error');return}
+    const analysts=[];document.querySelectorAll('.nt-a:checked').forEach(c=>analysts.push(c.value));
+    const st=[];document.querySelectorAll('.nt-st:checked').forEach(c=>st.push(c.value));
+    const th={id:gid(),name,description:document.getElementById('td').value,analysts,signalTypes:st,holdDays:+document.getElementById('th-hold').value||90,
+      filters:{minMC:+document.getElementById('th-mc').value,maxPE:+document.getElementById('th-pe').value,minDY:+document.getElementById('th-dy').value},
+      backtested:false,backtestResult:null,etfId:null,created:now()};
+    D.theses.push(th);log('thesis','Created',`"${name}" — ${analysts.length?analysts.join(', '):'All analysts'}, ${st.join('/')}`);
+    closeMod();renderTheses();toast('Thesis created','success');
   });
-  setTimeout(()=>{document.querySelectorAll('.es-factor-cb').forEach(cb=>{cb.onchange=()=>{document.querySelector(`.es-factor-wt[data-id="${cb.value}"]`).disabled=!cb.checked}})},50);
 }
 
-// ═══════════════════════════════════════════
-//  AUTOMATED RATING ENGINE
-// ═══════════════════════════════════════════
-function runAutoScore(){
-  const strat=getActiveStrategy();if(!strat)return;
-  const filtered=S.universe.filter(s=>{
-    if(strat.filters.minMC&&s.mc<strat.filters.minMC)return false;
-    if(strat.filters.maxPE&&s.pe>0&&s.pe>strat.filters.maxPE)return false;
-    if(strat.filters.minDY&&s.dy<strat.filters.minDY)return false;
-    if(strat.filters.sectors?.length&&!strat.filters.sectors.includes(s.s))return false;
-    return true;
-  });
-  const scored=filtered.map(stock=>{
-    const factorScores={};let composite=0;
-    strat.factors.forEach(f=>{
-      const def=FACTOR_CATALOG.find(c=>c.id===f.id);
-      const score=def?def.score(stock,strat):50;
-      factorScores[f.id]=+score.toFixed(1);
-      composite+=score*f.weight/100;
-    });
-    let rating='Hold';
-    if(composite>=70)rating='Strong Buy';else if(composite>=58)rating='Buy';else if(composite<=30)rating='Sell';
-    return{...stock,factorScores,composite:+composite.toFixed(1),rating};
-  });
-  scored.sort((a,b)=>b.composite-a.composite);
-  scored.forEach((r,i)=>r.rank=i+1);
-  S.ratings[strat.id]=scored;
-  renderRatings();
+function backtestThesis(id){
+  const th=D.theses.find(x=>x.id===id);if(!th)return;
+  const bonus=th.analysts.length?th.analysts.length*.15:0;
+  const skew=th.signalTypes.includes('downgrade')?-.3:.4;
+  const months=24;let sR=0,bR=0;
+  for(let i=0;i<months;i++){const m=rnd(-2.5,3),s=m+(.8+skew+bonus+rnd(-1.8,1.8));sR=(1+sR/100)*(1+s/100)*100-100;bR=(1+bR/100)*(1+m/100)*100-100}
+  const res={ret:+sR.toFixed(1),bench:+bR.toFixed(1),alpha:+(sR-bR).toFixed(1),sharpe:rnd(.3,2.2).toFixed(2),maxDD:-rnd(5,18),months,winRate:clamp(50+bonus*10+skew*15,30,80)};
+  th.backtested=true;th.backtestResult=res;
+  log('thesis','Backtested',`"${th.name}" — Return: ${fP(res.ret)}, Alpha: ${fP(res.alpha)}, Sharpe: ${res.sharpe}`);
+  renderTheses();toast('Backtest complete: '+fP(res.alpha)+' alpha','success');
 }
 
-function renderRatings(){
-  const strat=getActiveStrategy();if(!strat)return;
-  const data=S.ratings[strat.id]||[];
-  const search=(document.getElementById('rating-search')?.value||'').toLowerCase();
-  const filter=document.getElementById('rating-filter')?.value||'';
-  let filtered=data.filter(r=>{
-    if(search&&!r.t.toLowerCase().includes(search)&&!r.n.toLowerCase().includes(search))return false;
-    if(filter&&r.rating!==filter)return false;return true;
-  });
-  document.getElementById('r-buy').textContent=data.filter(r=>r.rating==='Strong Buy'||r.rating==='Buy').length;
-  document.getElementById('r-hold').textContent=data.filter(r=>r.rating==='Hold').length;
-  document.getElementById('r-sell').textContent=data.filter(r=>r.rating==='Sell').length;
-  document.getElementById('r-scored').textContent=data.length;
-  const rc={'Strong Buy':'badge-green',Buy:'badge-green',Hold:'badge-blue',Sell:'badge-red'};
-  document.getElementById('ratings-tbody').innerHTML=filtered.map(r=>{
-    const bars=strat.factors.map(f=>{const v=r.factorScores[f.id]||0;const cat=FACTOR_CATALOG.find(c=>c.id===f.id);return`<div title="${cat?.label}: ${v}" style="display:inline-block;width:${Math.max(40,100/strat.factors.length)}px;margin-right:2px"><div style="font-size:.6rem;color:var(--text-3)">${(cat?.label||'').slice(0,4)}</div><div class="score-bar"><div class="score-fill" style="width:${v}%;background:${v>60?'var(--green)':v<40?'var(--red)':'var(--gold)'}"></div></div></div>`}).join('');
-    return`<tr><td class="mono">${r.rank}</td><td class="mono" style="font-weight:700">${r.t}</td><td>${r.n}</td><td><span class="tag">${r.s}</span></td><td>${bars}</td><td class="mono" style="font-weight:700;font-size:.95rem">${r.composite}</td><td><span class="badge ${rc[r.rating]}">${r.rating}</span></td><td><button class="btn btn-sm" onclick="aiExplainRating('${r.t}')">Explain</button></td></tr>`}).join('');
+function createETFFromThesis(thId){
+  const th=D.theses.find(x=>x.id===thId);if(!th)return;
+  // Find matching signals -> stocks
+  let matching=D.signals.filter(s=>{
+    if(th.signalTypes.length&&!th.signalTypes.includes(s.type))return false;
+    if(th.analysts.length&&!th.analysts.includes(s.analyst))return false;return true});
+  // Unique tickers with signal count
+  const tickerMap={};matching.forEach(s=>{if(!tickerMap[s.ticker])tickerMap[s.ticker]={count:0,signals:[]};tickerMap[s.ticker].count++;tickerMap[s.ticker].signals.push(s)});
+  // Filter by thesis criteria
+  const candidates=Object.keys(tickerMap).map(t=>{const stk=D.universe.find(u=>u.t===t);return stk?{...stk,sigCount:tickerMap[t].count,sigDetail:tickerMap[t].signals}:null}).filter(Boolean)
+    .filter(s=>{if(th.filters.minMC&&s.mc<th.filters.minMC)return false;if(th.filters.maxPE&&s.pe>0&&s.pe>th.filters.maxPE)return false;if(th.filters.minDY&&s.dy<th.filters.minDY)return false;return true})
+    .sort((a,b)=>b.sigCount-a.sigCount);
+  const etf={id:gid(),name:th.name+' ETF',thesisId:thId,thesisName:th.name,status:'draft',created:now(),
+    holdings:candidates.slice(0,20).map(c=>({ticker:c.t,name:c.n,sector:c.s,mc:c.mc,weight:0,
+      rationale:`${c.sigCount} signal(s): ${c.sigDetail.slice(0,2).map(s=>s.analyst+' '+s.type).join('; ')}`,
+      addedAt:now(),addedBy:'Analyst',source:'thesis-auto'})),
+    submissions:[]};
+  // Equal weight
+  if(etf.holdings.length)etf.holdings.forEach(h=>h.weight=+(100/etf.holdings.length).toFixed(1));
+  D.etfs.push(etf);D.activeETF=etf.id;th.etfId=etf.id;
+  log('etf','Created from thesis',`"${etf.name}" — ${etf.holdings.length} holdings from "${th.name}"`);
+  renderTheses();nav('etfs');toast('ETF created with '+etf.holdings.length+' stocks','success');
 }
 
-function pushBuysToTrades(){
-  const strat=getActiveStrategy();if(!strat)return;
-  const data=S.ratings[strat.id]||[];
-  const buys=data.filter(r=>r.rating==='Strong Buy'||r.rating==='Buy');
-  let added=0;
-  buys.forEach(b=>{if(!S.trades.find(t=>t.ticker===b.t&&t.strategyId===strat.id&&t.status==='pending')){
-    S.trades.push({id:gid(),date:today(),ticker:b.t,name:b.n,sector:b.s,side:'Buy',score:b.composite,rationale:`${strat.name}: ${b.rating} (score ${b.composite})`,status:'pending',strategyId:strat.id,strategyName:strat.name});added++}});
-  toast(`Pushed ${added} trades from ${strat.name}`,'success');
+function deleteThesis(id){D.theses=D.theses.filter(t=>t.id!==id);log('thesis','Deleted','Thesis removed');renderTheses()}
+
+// ═══════ UNIVERSE ═══════
+function renderU(){
+  const q=(document.getElementById('u-q')?.value||'').toLowerCase(),sec=document.getElementById('u-sec')?.value||'';
+  let data=D.universe.filter(s=>{if(q&&!s.t.toLowerCase().includes(q)&&!s.n.toLowerCase().includes(q))return false;if(sec&&s.s!==sec)return false;return true});
+  document.getElementById('u-ct').textContent=D.universe.length;
+  // Count signals per ticker
+  const sigMap={};D.signals.forEach(s=>{sigMap[s.ticker]=(sigMap[s.ticker]||0)+1});
+  const etf=getETF();
+  document.getElementById('u-tbody').innerHTML=data.map(s=>{
+    const inETF=etf?.holdings.find(h=>h.ticker===s.t);
+    return`<tr><td class="mono" style="font-weight:700">${s.t}</td><td>${s.n}</td><td><span class="tag">${s.s}</span></td><td class="mono">${fN(s.mc*1e9)}</td><td class="mono">${s.pe>0?s.pe.toFixed(1):'N/A'}</td><td class="mono">${s.dy.toFixed(1)}%</td><td>${sigMap[s.t]?'<span class="badge bb">'+sigMap[s.t]+'</span>':'--'}</td><td>${inETF?'<span class="badge bg">In ETF</span>':(etf?`<button class="btn btn-s" onclick="addToETF('${s.t}')">+ Add</button>`:'--')}</td></tr>`}).join('');
 }
 
-// ═══════════════════════════════════════════
-//  SIGNALS
-// ═══════════════════════════════════════════
-function initSignals(){
-  const types=['upgrade','downgrade','initiation','pt_raise','pt_cut'];
-  const ratings=['Buy','Overweight','Equal-weight','Underweight','Sell','Outperform','Neutral'];
-  for(let i=0;i<60;i++){const stock=pick(TICKERS),type=pick(types),d=new Date();d.setDate(d.getDate()-rndI(0,30));
-    S.signals.push({id:gid(),date:fD(d),ticker:stock.t,name:stock.n,sector:stock.s,type,analyst:pick(ANALYSTS),from:pick(ratings),to:pick(ratings),pt:type.includes('pt')?rndI(80,500):null,pushed:false})}
-  S.signals.sort((a,b)=>b.date.localeCompare(a.date));
-}
-
-function renderSignals(){
-  const tf=document.getElementById('sig-type')?.value||'';const search=(document.getElementById('sig-search')?.value||'').toLowerCase();
-  let data=S.signals.filter(s=>{if(tf&&s.type!==tf)return false;if(search&&!s.ticker.toLowerCase().includes(search)&&!s.analyst.toLowerCase().includes(search))return false;return true});
-  document.getElementById('sig-up').textContent=S.signals.filter(s=>s.type==='upgrade').length;
-  document.getElementById('sig-down').textContent=S.signals.filter(s=>s.type==='downgrade').length;
-  document.getElementById('sig-init').textContent=S.signals.filter(s=>s.type==='initiation').length;
-  document.getElementById('sig-total').textContent=S.signals.length;
+function renderS(){
+  const tp=document.getElementById('s-type')?.value||'',an=document.getElementById('s-analyst')?.value||'',q=(document.getElementById('s-q')?.value||'').toLowerCase();
+  let data=D.signals.filter(s=>{if(tp&&s.type!==tp)return false;if(an&&s.analyst!==an)return false;if(q&&!s.ticker.toLowerCase().includes(q)&&!s.analyst.toLowerCase().includes(q))return false;return true});
+  document.getElementById('s-ct').textContent=D.signals.length;
   const tl={upgrade:'Upgrade',downgrade:'Downgrade',initiation:'Initiation',pt_raise:'PT Raise',pt_cut:'PT Cut'};
-  const tb={upgrade:'badge-green',downgrade:'badge-red',initiation:'badge-blue',pt_raise:'badge-green',pt_cut:'badge-red'};
-  document.getElementById('signals-tbody').innerHTML=data.map(s=>
-    `<tr><td class="mono" style="font-size:.75rem">${s.date}</td><td class="mono" style="font-weight:600">${s.ticker}</td><td><span class="badge ${tb[s.type]}">${tl[s.type]}</span></td><td>${s.analyst}</td><td>${s.from}</td><td>${s.to}</td><td class="mono">${s.pt?'$'+s.pt:'--'}</td><td>${s.pushed?'<span class="badge badge-blue">Pushed</span>':`<button class="btn btn-sm" onclick="pushSignal('${s.id}')">Propose</button>`}</td></tr>`).join('');
+  const tb={upgrade:'bg',downgrade:'br',initiation:'bb',pt_raise:'bg',pt_cut:'br'};
+  const etf=getETF();
+  document.getElementById('s-tbody').innerHTML=data.slice(0,100).map(s=>{
+    const inETF=etf?.holdings.find(h=>h.ticker===s.ticker);
+    return`<tr><td class="mono" style="font-size:.75rem">${s.date}</td><td class="mono" style="font-weight:600">${s.ticker}</td><td><span class="badge ${tb[s.type]}">${tl[s.type]}</span></td><td>${s.analyst}</td><td style="font-size:.75rem">${s.from} -> ${s.to}</td><td class="mono">${s.pt?'$'+s.pt:'--'}</td><td>${inETF?'<span class="badge bg">In ETF</span>':(etf?`<button class="btn btn-s" onclick="addToETFFromSignal('${s.id}')">+ Add</button>`:'--')}</td></tr>`}).join('');
 }
 
-function pushSignal(id){const sig=S.signals.find(s=>s.id===id);if(!sig||sig.pushed)return;sig.pushed=true;
-  const side=['upgrade','initiation','pt_raise'].includes(sig.type)?'Buy':'Sell';
-  S.trades.push({id:gid(),date:today(),ticker:sig.ticker,name:sig.name,sector:sig.sector,side,score:rndI(40,90),rationale:`Signal: ${sig.analyst} ${sig.type} ${sig.from}->${sig.to}${sig.pt?' PT $'+sig.pt:''}`,status:'pending',strategyId:'manual',strategyName:'Signal-Based'});
-  renderSignals();toast(`Trade proposed: ${side} ${sig.ticker}`,'success')}
-
-async function fetchLiveSignals(){
-  if(!S.keys.fmp){toast('Set FMP API key to fetch live signals','error');return}
-  toast('Fetching live analyst grades...','info');
-  for(const stock of S.universe.slice(0,10)){
-    try{const r=await fetch(`https://financialmodelingprep.com/api/v3/grade/${stock.t}?limit=3&apikey=${S.keys.fmp}`);
-      const data=await r.json();if(Array.isArray(data))data.forEach(g=>{
-        const type=g.newGrade?.toLowerCase().includes('buy')?'upgrade':'downgrade';
-        S.signals.unshift({id:gid(),date:g.date||today(),ticker:stock.t,name:stock.n,sector:stock.s,type,analyst:g.gradingCompany||'Unknown',from:g.previousGrade||'--',to:g.newGrade||'--',pt:null,pushed:false})});
-    }catch{}}
-  S.signals=S.signals.slice(0,200);renderSignals();toast('Live signals fetched','success');
-}
-
-// ═══════════════════════════════════════════
-//  TRADES & PM
-// ═══════════════════════════════════════════
-function renderTrades(){
-  const f=document.getElementById('trade-filter')?.value||'';
-  let data=S.trades.filter(t=>!f||t.status===f);
-  document.getElementById('t-pending').textContent=S.trades.filter(t=>t.status==='pending').length;
-  document.getElementById('t-approved').textContent=S.trades.filter(t=>t.status==='approved').length;
-  document.getElementById('t-rejected').textContent=S.trades.filter(t=>t.status==='rejected').length;
-  const sb={Buy:'badge-green',Sell:'badge-red'},stb={pending:'badge-orange',approved:'badge-green',rejected:'badge-red'};
-  document.getElementById('trades-tbody').innerHTML=data.map(t=>
-    `<tr><td class="mono" style="font-size:.75rem">${t.date}</td><td class="mono" style="font-weight:600">${t.ticker}</td><td style="font-size:.75rem">${t.strategyName||'--'}</td><td><span class="badge ${sb[t.side]}">${t.side}</span></td><td class="mono">${t.score}</td><td style="max-width:220px;font-size:.76rem">${t.rationale}</td><td><span class="badge ${stb[t.status]}">${t.status}</span></td><td>${t.status==='pending'?`<button class="btn btn-sm" style="color:var(--green)" onclick="setTrade('${t.id}','approved')">Approve</button> <button class="btn btn-sm" style="color:var(--red)" onclick="setTrade('${t.id}','rejected')">Reject</button>`:''}</td></tr>`).join('');
-}
-function setTrade(id,status){const t=S.trades.find(x=>x.id===id);if(t){t.status=status;renderTrades();renderPM();toast(`${t.ticker} ${status}`,'success')}}
-
-function renderPM(){
-  const pending=S.trades.filter(t=>t.status==='pending');
-  const sb={Buy:'badge-green',Sell:'badge-red'};
-  document.getElementById('pm-tbody').innerHTML=pending.length?pending.map(t=>
-    `<tr><td class="mono" style="font-size:.75rem">${t.date}</td><td class="mono" style="font-weight:600">${t.ticker}</td><td style="font-size:.75rem">${t.strategyName||''}</td><td><span class="badge ${sb[t.side]}">${t.side}</span></td><td class="mono">${t.score}</td><td style="font-size:.76rem">${t.rationale}</td><td><button class="btn btn-sm btn-primary" onclick="setTrade('${t.id}','approved');renderPM()">Approve</button> <button class="btn btn-sm" style="color:var(--red)" onclick="setTrade('${t.id}','rejected');renderPM()">Reject</button></td></tr>`).join(''):'<tr><td colspan="7" class="empty">No pending proposals</td></tr>';
-}
-function approveAll(){S.trades.filter(t=>t.status==='pending').forEach(t=>t.status='approved');renderPM();renderTrades();toast('All approved','success')}
-
-// ═══════════════════════════════════════════
-//  ETFs
-// ═══════════════════════════════════════════
-function openNewETF(){showModal('New ETF',`
-  <div class="form-group"><label>ETF Name</label><input id="ne-name" placeholder="e.g. MSIM Value Alpha" style="width:100%"></div>
-  <div class="form-group"><label>Ticker</label><input id="ne-ticker" placeholder="e.g. MVAL" style="width:100%"></div>
-  <div class="form-group"><label>Strategy</label><select id="ne-strategy" style="width:100%">${S.strategies.map(s=>`<option value="${s.id}">${s.name}</option>`).join('')}</select></div>
-  <div class="form-group"><label>Description</label><textarea id="ne-desc" style="width:100%" placeholder="ETF description..."></textarea></div>
-`,()=>{
-  const name=document.getElementById('ne-name').value.trim();if(!name){toast('Name required','error');return}
-  const etf={id:gid(),name,ticker:document.getElementById('ne-ticker').value.toUpperCase()||name.slice(0,4).toUpperCase(),strategyId:document.getElementById('ne-strategy').value,desc:document.getElementById('ne-desc').value,holdings:[]};
-  S.etfs.push(etf);S.activeETF=etf.id;closeModal();updateETFSelect();renderETF();toast('ETF created: '+name,'success');
-})}
-
-function updateETFSelect(){
-  document.getElementById('etf-select').innerHTML=S.etfs.map(e=>`<option value="${e.id}" ${e.id===S.activeETF?'selected':''}>${e.ticker} - ${e.name}</option>`).join('')||'<option>No ETFs</option>';
-}
-function switchETF(){S.activeETF=document.getElementById('etf-select').value;renderETF()}
-function getActiveETF(){return S.etfs.find(e=>e.id===S.activeETF)}
+// ═══════ ETF BUILDER ═══════
+function getETF(){return D.etfs.find(e=>e.id===D.activeETF)}
+function updateETFSel(){document.getElementById('etf-sel').innerHTML=D.etfs.map(e=>`<option value="${e.id}" ${e.id===D.activeETF?'selected':''}>${e.name} (${e.status})</option>`).join('')||'<option>No ETFs</option>'}
+function switchETF(){D.activeETF=document.getElementById('etf-sel').value;renderETF()}
 
 function renderETF(){
-  updateETFSelect();const etf=getActiveETF();
-  if(!etf){document.getElementById('etf-tbody').innerHTML='<tr><td colspan="7" class="empty">Create an ETF first.</td></tr>';document.getElementById('etf-info').innerHTML='';return}
-  const strat=S.strategies.find(s=>s.id===etf.strategyId);
-  document.getElementById('etf-info').innerHTML=`<div class="card"><div class="card-body" style="padding:10px 16px"><div class="flex justify-between items-center"><div><strong>${etf.ticker}</strong> · ${etf.name}<span style="margin-left:8px;font-size:.75rem;color:var(--text-3)">Strategy: ${strat?.name||'None'}</span></div><div class="flex gap-8"><span class="badge badge-blue">${etf.holdings.length} holdings</span></div></div></div></div>`;
+  updateETFSel();const etf=getETF();
+  if(!etf){document.getElementById('etf-tbody').innerHTML='<tr><td colspan="7" class="empty">Create an ETF from a thesis first, or click + New ETF.</td></tr>';document.getElementById('etf-meta').innerHTML='';document.getElementById('etf-steps').innerHTML='';return}
+  const th=D.theses.find(t=>t.id===etf.thesisId);
+  const steps=[{l:'Thesis',done:true},{l:'Backtest',done:th?.backtested},{l:'Select Stocks',done:etf.holdings.length>0},{l:'Weight',done:Math.abs(etf.holdings.reduce((a,h)=>a+h.weight,0)-100)<1},{l:'Compliance',done:etf.compliancePassed},{l:'PM Review',done:etf.status==='approved'}];
+  document.getElementById('etf-steps').innerHTML=steps.map((s,i)=>`<div class="step-dot ${s.done?'done':''}" style="${i===steps.findIndex(x=>!x.done)?'color:var(--pri);border-bottom-color:var(--pri)':''}">${s.l}</div>`).join('');
+  document.getElementById('etf-meta').innerHTML=`<div class="card"><div class="cb" style="padding:10px 16px"><div class="flex jb ac"><div><b>${etf.name}</b> · <span class="badge ${etf.status==='draft'?'bo':etf.status==='submitted'?'bb':etf.status==='approved'?'bg':'br'}">${etf.status}</span>${th?` · Thesis: ${th.name}`:''}</div><div class="flex g8"><span style="font-size:.78rem;color:var(--txt2)">${etf.holdings.length} holdings</span></div></div></div></div>`;
   const tw=etf.holdings.reduce((a,h)=>a+h.weight,0);
-  document.getElementById('etf-total-weight').textContent=tw.toFixed(1)+'%';
-  document.getElementById('etf-total-weight').style.color=Math.abs(tw-100)<0.5?'var(--green)':tw>100?'var(--red)':'var(--text)';
-  const ratings=S.ratings[etf.strategyId]||[];
-  document.getElementById('etf-tbody').innerHTML=etf.holdings.length?etf.holdings.map(h=>{
-    const r=ratings.find(x=>x.t===h.ticker);const rc={'Strong Buy':'badge-green',Buy:'badge-green',Hold:'badge-blue',Sell:'badge-red'};
-    return`<tr><td class="mono" style="font-weight:600">${h.ticker}</td><td>${h.name}</td><td><span class="tag">${h.sector}</span></td><td><input type="number" value="${h.weight}" min="0" max="100" step="0.1" style="width:60px" onchange="updateHoldingWeight('${h.ticker}',this.value)"></td><td class="mono">${r?r.composite:'--'}</td><td>${r?`<span class="badge ${rc[r.rating]}">${r.rating}</span>`:''}</td><td><button class="btn-icon" onclick="removeHolding('${h.ticker}')">x</button></td></tr>`}).join(''):'<tr><td colspan="7" class="empty">No holdings. Import approved trades or add manually.</td></tr>';
+  document.getElementById('etf-tw').textContent=tw.toFixed(1)+'%';document.getElementById('etf-tw').style.color=Math.abs(tw-100)<.5?'var(--grn)':'var(--red)';
+  document.getElementById('etf-tbody').innerHTML=etf.holdings.length?etf.holdings.map(h=>`<tr>
+    <td class="mono" style="font-weight:700">${h.ticker}</td><td>${h.name}</td><td><span class="tag">${h.sector}</span></td>
+    <td><input type="number" value="${h.weight}" min="0" max="100" step=".1" style="width:55px" onchange="updW('${h.ticker}',this.value)"></td>
+    <td style="font-size:.75rem;max-width:200px">${h.rationale}</td>
+    <td style="font-size:.7rem;color:var(--txt3)">${h.addedAt?.slice(0,10)||''}<br>${h.addedBy||''} · ${h.source||''}</td>
+    <td><button class="btn btn-s" onclick="rmH('${h.ticker}')">Remove</button></td>
+  </tr>`).join(''):'<tr><td colspan="7" class="empty">No holdings. Go to Universe & Signals to add stocks.</td></tr>';
 }
 
-function importApprovedToETF(){
-  const etf=getActiveETF();if(!etf){toast('Create an ETF first','error');return}
-  const approved=S.trades.filter(t=>t.status==='approved'&&t.side==='Buy');let added=0;
-  approved.forEach(t=>{if(!etf.holdings.find(h=>h.ticker===t.ticker)){
-    const stock=S.universe.find(u=>u.t===t.ticker);
-    etf.holdings.push({ticker:t.ticker,name:t.name,sector:t.sector||stock?.s||'',weight:0});added++}});
-  if(added){equalWeightETF();toast(`Imported ${added} holdings`,'success')}else toast('No new approved trades','info');
-}
-function equalWeightETF(){const etf=getActiveETF();if(!etf||!etf.holdings.length)return;const w=+(100/etf.holdings.length).toFixed(1);etf.holdings.forEach(h=>h.weight=w);renderETF()}
-function capWeightETF(){const etf=getActiveETF();if(!etf||!etf.holdings.length)return;const total=etf.holdings.reduce((a,h)=>{const s=S.universe.find(u=>u.t===h.ticker);return a+(s?.mc||100)},0);etf.holdings.forEach(h=>{const s=S.universe.find(u=>u.t===h.ticker);h.weight=+((s?.mc||100)/total*100).toFixed(1)});renderETF()}
-function updateHoldingWeight(ticker,val){const etf=getActiveETF();const h=etf?.holdings.find(x=>x.ticker===ticker);if(h)h.weight=+val;renderETF()}
-function removeHolding(ticker){const etf=getActiveETF();if(etf)etf.holdings=etf.holdings.filter(h=>h.ticker!==ticker);renderETF()}
-
-// ═══════════════════════════════════════════
-//  OPTIMIZER
-// ═══════════════════════════════════════════
-function runOptimizer(){
-  const etf=getActiveETF();if(!etf||!etf.holdings.length){toast('No holdings to optimize','error');return}
-  const maxP=+document.getElementById('opt-maxpos').value;const n=etf.holdings.length;
-  let wts=etf.holdings.map(()=>rnd(0.5,maxP));const tot=wts.reduce((a,b)=>a+b);wts=wts.map(w=>+(w/tot*100).toFixed(1));
-  etf.holdings.forEach((h,i)=>h.weight=wts[i]);
-  const ret=rnd(8,18),vol=rnd(10,22),sharpe=+(ret/vol).toFixed(2);
-  document.getElementById('opt-results').innerHTML=`<div class="stat-row"><div class="stat"><div class="stat-val pos">${ret.toFixed(1)}%</div><div class="stat-label">Exp Return</div></div><div class="stat"><div class="stat-val">${vol.toFixed(1)}%</div><div class="stat-label">Volatility</div></div><div class="stat"><div class="stat-val">${sharpe}</div><div class="stat-label">Sharpe</div></div><div class="stat"><div class="stat-val">${n}</div><div class="stat-label">Holdings</div></div></div>`;
-  renderETF();toast('Optimized','success');
+function addToETF(ticker){
+  const etf=getETF();if(!etf){toast('Create or select an ETF first','error');return}
+  if(etf.holdings.find(h=>h.ticker===ticker)){toast('Already in ETF','error');return}
+  const stk=D.universe.find(u=>u.t===ticker);if(!stk)return;
+  const rationale=prompt('Why add '+ticker+'? (rationale for audit trail)');if(rationale===null)return;
+  etf.holdings.push({ticker:stk.t,name:stk.n,sector:stk.s,mc:stk.mc,weight:0,rationale:rationale||'Manual add',addedAt:now(),addedBy:'Analyst',source:'manual'});
+  log('stock','Added to ETF',`${ticker} added to "${etf.name}" — ${rationale||'manual'}`);
+  renderETF();renderU();toast(ticker+' added','success');
 }
 
-// ═══════════════════════════════════════════
-//  COMPLIANCE
-// ═══════════════════════════════════════════
-function runCompliance(){
-  const etf=getActiveETF();if(!etf){toast('Select an ETF','error');return}
+function addToETFFromSignal(sigId){
+  const sig=D.signals.find(s=>s.id===sigId);if(!sig)return;
+  const etf=getETF();if(!etf){toast('Create an ETF first','error');return}
+  if(etf.holdings.find(h=>h.ticker===sig.ticker)){toast('Already in ETF','error');return}
+  const stk=D.universe.find(u=>u.t===sig.ticker);
+  const rationale=`Signal: ${sig.analyst} ${sig.type} (${sig.from}->${sig.to})${sig.pt?' PT $'+sig.pt:''}`;
+  etf.holdings.push({ticker:sig.ticker,name:sig.name||stk?.n||sig.ticker,sector:sig.sector||stk?.s||'',mc:stk?.mc||0,weight:0,rationale,addedAt:now(),addedBy:'Analyst',source:'signal'});
+  log('stock','Added from signal',`${sig.ticker} — ${rationale} → "${etf.name}"`);
+  renderETF();renderS();toast(sig.ticker+' added from signal','success');
+}
+
+function rmH(ticker){const etf=getETF();if(!etf)return;const h=etf.holdings.find(x=>x.ticker===ticker);
+  etf.holdings=etf.holdings.filter(x=>x.ticker!==ticker);log('stock','Removed from ETF',`${ticker} removed from "${etf.name}"`);renderETF();toast(ticker+' removed','info')}
+function updW(ticker,v){const etf=getETF();const h=etf?.holdings.find(x=>x.ticker===ticker);if(h)h.weight=+v;renderETF()}
+function eqW(){const etf=getETF();if(!etf||!etf.holdings.length)return;const w=+(100/etf.holdings.length).toFixed(1);etf.holdings.forEach(h=>h.weight=w);log('etf','Equal weighted',`"${etf.name}" — ${etf.holdings.length} holdings at ${w}% each`);renderETF()}
+function capW(){const etf=getETF();if(!etf||!etf.holdings.length)return;const tot=etf.holdings.reduce((a,h)=>a+(h.mc||100),0);etf.holdings.forEach(h=>h.weight=+((h.mc||100)/tot*100).toFixed(1));log('etf','Cap weighted',`"${etf.name}"`);renderETF()}
+
+function openNewETF(){showMod('New ETF',`
+  <div class="fg"><label>Name</label><input id="ne-n" style="width:100%" placeholder="e.g. MSIM Quality Growth"></div>
+  <div class="fg"><label>Linked Thesis (optional)</label><select id="ne-th" style="width:100%"><option value="">None</option>${D.theses.map(t=>`<option value="${t.id}">${t.name}</option>`).join('')}</select></div>
+`,()=>{const name=document.getElementById('ne-n').value.trim();if(!name){toast('Name required','error');return}
+  const thId=document.getElementById('ne-th').value;
+  const etf={id:gid(),name,thesisId:thId||null,thesisName:D.theses.find(t=>t.id===thId)?.name||'',status:'draft',created:now(),holdings:[],submissions:[]};
+  D.etfs.push(etf);D.activeETF=etf.id;log('etf','Created',`"${name}"`);closeMod();renderETF();toast('ETF created','success');
+})}
+
+function submitForReview(){
+  const etf=getETF();if(!etf){toast('No ETF selected','error');return}
+  if(!etf.holdings.length){toast('Add holdings first','error');return}
+  const tw=etf.holdings.reduce((a,h)=>a+h.weight,0);if(Math.abs(tw-100)>1){toast('Weights must sum to 100% (currently '+tw.toFixed(1)+'%)','error');return}
+  const notes=prompt('Submission notes for PM (optional):');
+  etf.status='submitted';etf.submissions.push({date:now(),notes:notes||'',holdings:JSON.parse(JSON.stringify(etf.holdings))});
+  log('review','Submitted for PM',`"${etf.name}" — ${etf.holdings.length} holdings, ${notes||'no notes'}`);
+  renderETF();toast('Submitted for PM review','success');
+}
+
+function runComp(){
+  const etf=getETF();if(!etf){toast('No ETF','error');return}
   const checks=[];const tw=etf.holdings.reduce((a,b)=>a+b.weight,0);const maxW=Math.max(...etf.holdings.map(h=>h.weight),0);
   const secW={};etf.holdings.forEach(h=>{secW[h.sector]=(secW[h.sector]||0)+h.weight});const maxSW=Math.max(...Object.values(secW),0);
-  checks.push({n:'Total Weight = 100%',pass:Math.abs(tw-100)<0.5,d:`${tw.toFixed(1)}%`});
-  checks.push({n:'Max Position <= 5%',pass:maxW<=5.01,d:`${maxW.toFixed(1)}%`});
-  checks.push({n:'Max Sector <= 25%',pass:maxSW<=25.01,d:`${maxSW.toFixed(1)}%`});
-  checks.push({n:'Min Holdings >= 20',pass:etf.holdings.length>=20,d:`${etf.holdings.length}`});
-  checks.push({n:'Max Holdings <= 100',pass:etf.holdings.length<=100,d:`${etf.holdings.length}`});
-  const pc=checks.filter(c=>c.pass).length;
-  document.getElementById('compliance-results').innerHTML=`<div class="stat-row"><div class="stat"><div class="stat-val ${pc===checks.length?'pos':'neg'}">${pc}/${checks.length}</div><div class="stat-label">Passed</div></div></div><div class="card"><div class="card-body" style="padding:0"><table><thead><tr><th>Check</th><th>Status</th><th>Detail</th></tr></thead><tbody>${checks.map(c=>`<tr><td>${c.n}</td><td><span class="badge ${c.pass?'badge-green':'badge-red'}">${c.pass?'PASS':'FAIL'}</span></td><td class="mono">${c.d}</td></tr>`).join('')}</tbody></table></div></div>`;
-  toast(`Compliance: ${pc}/${checks.length}`,'success');
+  checks.push({n:'Weights = 100%',p:Math.abs(tw-100)<.5,d:tw.toFixed(1)+'%'});
+  checks.push({n:'Max position <= 5%',p:maxW<=5.01,d:maxW.toFixed(1)+'%'});
+  checks.push({n:'Max sector <= 25%',p:maxSW<=25.01,d:maxSW.toFixed(1)+'%'});
+  checks.push({n:'Min 20 holdings',p:etf.holdings.length>=20,d:etf.holdings.length+''});
+  const pc=checks.filter(c=>c.p).length;etf.compliancePassed=pc===checks.length;
+  document.getElementById('comp-body').innerHTML=`<table>${checks.map(c=>`<tr><td>${c.n}</td><td><span class="badge ${c.p?'bg':'br'}">${c.p?'PASS':'FAIL'}</span></td><td class="mono">${c.d}</td></tr>`).join('')}</table>`;
+  log('etf','Compliance check',`"${etf.name}" — ${pc}/${checks.length} passed`);renderETF();}
+
+function runBT(){
+  const etf=getETF();if(!etf||!etf.holdings.length){toast('Need holdings','error');return}
+  const mo=24;let sR=0,bR=0;for(let i=0;i<mo;i++){const m=rnd(-2.5,3),s=m+rnd(-.5,1.5);sR=(1+sR/100)*(1+s/100)*100-100;bR=(1+bR/100)*(1+m/100)*100-100}
+  const alpha=sR-bR;
+  document.getElementById('bt-body').innerHTML=`<div class="sr"><div class="st"><div class="sv ${sR>=0?'pos':'neg'}">${fP(sR)}</div><div class="sl">Return</div></div><div class="st"><div class="sv ${alpha>=0?'pos':'neg'}">${fP(alpha)}</div><div class="sl">Alpha</div></div><div class="st"><div class="sv">${rnd(.5,2.2).toFixed(2)}</div><div class="sl">Sharpe</div></div></div>`;
+  log('etf','Backtested',`"${etf.name}" — Return ${fP(sR)}, Alpha ${fP(alpha)}`);
 }
 
-// ═══════════════════════════════════════════
-//  BACKTEST LAB
-// ═══════════════════════════════════════════
-function showBTTab(id){['thesis','strategy','ideas','history'].forEach(t=>{document.getElementById('bt-'+t)?.classList.toggle('hidden',t!==id)});
-  document.querySelectorAll('#panel-backtest .tab').forEach((t,i)=>t.classList.toggle('active',['thesis','strategy','ideas','history'][i]===id));
-  if(id==='strategy')populateBTStrategySelect();if(id==='history')renderBTHistory();if(id==='thesis')renderThesisTemplates();
+// ═══════ PM REVIEW ═══════
+function renderReview(){
+  const submitted=D.etfs.filter(e=>e.status==='submitted');
+  document.getElementById('review-list').innerHTML=submitted.length?submitted.map(etf=>{
+    const th=D.theses.find(t=>t.id===etf.thesisId);const sub=etf.submissions[etf.submissions.length-1];
+    return`<div class="card" style="margin-bottom:16px"><div class="ch"><h3>${etf.name}</h3><div class="flex g8"><button class="btn btn-s btn-p" onclick="pmAction('${etf.id}','approved')">Approve</button><button class="btn btn-s btn-d" onclick="pmAction('${etf.id}','rejected')">Reject</button><button class="btn btn-s" onclick="pmAction('${etf.id}','revision')">Request Revision</button></div></div>
+    <div class="cb">
+      ${th?`<div style="font-size:.82rem;margin-bottom:8px"><b>Thesis:</b> ${th.name} — ${th.description?.slice(0,150)||''}</div>`:''}
+      ${sub?.notes?`<div style="font-size:.8rem;color:var(--txt2);margin-bottom:8px"><b>Analyst notes:</b> ${sub.notes}</div>`:''}
+      <div style="font-size:.75rem;color:var(--txt3);margin-bottom:8px">Submitted: ${sub?.date||'--'} · ${etf.holdings.length} holdings · Total weight: ${etf.holdings.reduce((a,h)=>a+h.weight,0).toFixed(1)}%</div>
+      <table><thead><tr><th>Ticker</th><th>Name</th><th>Weight</th><th>Rationale</th><th>Source</th><th>Added By</th></tr></thead>
+      <tbody>${etf.holdings.map(h=>`<tr><td class="mono" style="font-weight:700">${h.ticker}</td><td>${h.name}</td><td class="mono">${h.weight}%</td><td style="font-size:.75rem">${h.rationale}</td><td><span class="tag">${h.source||'manual'}</span></td><td style="font-size:.72rem">${h.addedBy||'--'}</td></tr>`).join('')}</tbody></table>
+    </div></div>`}).join(''):'<div class="empty">No ETFs pending review. Submit an ETF from the ETF Builder.</div>';
 }
 
-function renderThesisTemplates(){
-  const tpls=[
-    {name:'Follow Top 3 Banks',desc:'Buy upgrades from Goldman Sachs, Morgan Stanley, JP Morgan only. Equal weight, 90-day hold.',analysts:['Goldman Sachs','Morgan Stanley','JP Morgan'],types:['upgrade'],hold:90,maxpos:20},
-    {name:'Contrarian Downgrades',desc:'Buy stocks downgraded by analysts (mean-reversion thesis). 60-day hold with tight stop-loss.',analysts:[],types:['downgrade'],hold:60,maxpos:15},
-    {name:'PT Momentum',desc:'Buy on price target raises. Follow all analysts. Score-weighted sizing.',analysts:[],types:['pt_raise'],hold:120,maxpos:25},
-    {name:'Elite Initiations',desc:'Only buy new coverage initiations from Goldman, BofA, Citi. High conviction.',analysts:['Goldman Sachs','BofA','Citi'],types:['initiation'],hold:180,maxpos:10},
-    {name:'Consensus Shift',desc:'Buy upgrades from 5+ different analysts within 30 days. Strong consensus signal.',analysts:[],types:['upgrade','initiation'],hold:90,maxpos:20},
-    {name:'Dividend + Upgrade',desc:'Only buy upgraded stocks that also pay >2% dividend yield.',analysts:[],types:['upgrade'],hold:180,maxpos:15},
-    {name:'Tech Analyst Picks',desc:'Follow all analyst upgrades but only in Technology sector.',analysts:[],types:['upgrade','pt_raise'],hold:90,maxpos:20,sectors:'Technology'},
-    {name:'Value Contrarian',desc:'Buy when analysts downgrade but P/E is below 15 — classic value play.',analysts:[],types:['downgrade'],hold:120,maxpos:15},
+function pmAction(id,action){
+  const etf=D.etfs.find(e=>e.id===id);if(!etf)return;
+  let notes='';if(action==='revision')notes=prompt('What needs to change?')||'';
+  etf.status=action==='revision'?'draft':action;
+  log('review','PM '+action,`"${etf.name}" ${notes?'— '+notes:''}`,'PM');
+  renderReview();toast('ETF '+action,'success');
+}
+
+// ═══════ AUDIT ═══════
+function renderAudit(){
+  const f=document.getElementById('aud-filter')?.value||'';
+  const data=f?D.auditLog.filter(a=>a.type===f):D.auditLog;
+  const tc={'thesis':'bp','etf':'bb','stock':'bg','review':'bgl','signal':'bo'};
+  document.getElementById('aud-tbody').innerHTML=data.length?data.map(a=>`<tr><td class="mono" style="font-size:.72rem">${a.ts}</td><td><span class="badge ${tc[a.type]||'bb'}">${a.type}</span></td><td style="font-weight:500">${a.action}</td><td style="font-size:.78rem">${a.detail}</td><td>${a.user}</td></tr>`).join(''):'<tr><td colspan="5" class="empty">No audit entries</td></tr>';
+}
+
+// ═══════ DATA HUB ═══════
+function saveKeys(){D.keys.ai=document.getElementById('aiKey').value.trim();D.keys.fmp=document.getElementById('fmpKey').value.trim();D.keys.fh=document.getElementById('fhKey').value.trim();toast('Keys saved','success')}
+
+function handleUpload(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{let rows;const ext=f.name.split('.').pop();
+  if(ext==='json')rows=JSON.parse(ev.target.result);else rows=parseCSV(ev.target.result,ext==='tsv'?'\t':',');
+  if(!Array.isArray(rows)||!rows.length){toast('No data','error');return}
+  document.getElementById('up-preview').innerHTML=`<div class="card"><div class="ch"><h3>${rows.length} rows</h3><button class="btn btn-s btn-p" onclick="doImport(window._upR)">Import</button></div><div class="cb" style="padding:0;max-height:180px;overflow-y:auto"><table><thead><tr>${Object.keys(rows[0]).map(k=>`<th>${k}</th>`).join('')}</tr></thead><tbody>${rows.slice(0,8).map(r=>`<tr>${Object.values(r).map(v=>`<td class="mono">${v??''}</td>`).join('')}</tr>`).join('')}</tbody></table></div></div>`;
+  window._upR=rows;}catch(er){toast('Parse error','error')}};r.readAsText(f)}
+
+function parseCSV(t,d=','){const l=t.trim().split('\n');if(l.length<2)return[];const h=l[0].split(d).map(x=>x.trim().replace(/^"|"$/g,''));return l.slice(1).map(ln=>{const v=ln.split(d);const o={};h.forEach((k,i)=>o[k]=v[i]?.trim().replace(/^"|"$/g,'')||'');return o})}
+function parsePaste(){const t=document.getElementById('paste-d').value.trim();if(!t){toast('No data','error');return}let r;try{r=JSON.parse(t)}catch{r=parseCSV(t,t.includes('\t')?'\t':',')}if(r?.length)doImport(r);else toast('Could not parse','error')}
+
+function doImport(rows){
+  const cMap={ticker:['ticker','symbol'],name:['name','company'],sector:['sector','industry'],mc:['marketcap','market_cap','mktcap'],pe:['pe','p_e'],dy:['dividendyield','div_yield','yield'],p:['price','close']};
+  function findC(row,als){for(const a of als)for(const k of Object.keys(row))if(k.toLowerCase().replace(/[^a-z]/g,'')===a)return k;return null}
+  let n=0;rows.forEach(row=>{const tC=findC(row,cMap.ticker);const ticker=(row[tC]||'').toUpperCase().trim();if(!ticker)return;
+    const ex=D.universe.find(u=>u.t===ticker);const d={t:ticker,n:row[findC(row,cMap.name)]||ticker,s:row[findC(row,cMap.sector)]||'Other',mc:parseFloat(row[findC(row,cMap.mc)])||100,pe:parseFloat(row[findC(row,cMap.pe)])||0,dy:parseFloat(row[findC(row,cMap.dy)])||0,p:parseFloat(row[findC(row,cMap.p)])||0};
+    if(ex)Object.assign(ex,d);else D.universe.push({...d,id:gid(),z:rnd(-2,2),beta:rnd(.6,1.8),rsi:rI(20,80),mom:rnd(-10,15)});n++});
+  log('signal','Data imported',`${n} stocks from upload`);renderU();toast(`Imported ${n}`,'success');
+}
+
+async function fetchFMP(){if(!D.keys.fmp){toast('Set FMP key','error');return}
+  const ts=(document.getElementById('fmp-t').value||'AAPL').split(',').map(t=>t.trim()).filter(Boolean);
+  try{const r=await fetch(`https://financialmodelingprep.com/api/v3/quote/${ts.join(',')}?apikey=${D.keys.fmp}`);const d=await r.json();
+    if(Array.isArray(d))d.forEach(q=>{const ex=D.universe.find(u=>u.t===q.symbol);if(ex){ex.p=q.price;ex.pe=q.pe||ex.pe;ex.mc=(q.marketCap||0)/1e9||ex.mc}
+      else D.universe.push({id:gid(),t:q.symbol,n:q.name||q.symbol,s:'Other',mc:(q.marketCap||0)/1e9,pe:q.pe||0,dy:0,p:q.price||0,z:rnd(-2,2),beta:1,rsi:50,mom:0})});
+    log('signal','FMP fetch',`${d.length} quotes`);renderU();toast(`Updated ${d.length}`,'success');
+  }catch{toast('FMP failed','error')}}
+
+async function fetchFMPGrades(){if(!D.keys.fmp){toast('Set FMP key','error');return}
+  const ts=(document.getElementById('fmp-t').value||'AAPL').split(',').map(t=>t.trim()).filter(Boolean);let n=0;
+  for(const t of ts.slice(0,5)){try{const r=await fetch(`https://financialmodelingprep.com/api/v3/grade/${t}?limit=5&apikey=${D.keys.fmp}`);const d=await r.json();
+    if(Array.isArray(d))d.forEach(g=>{D.signals.unshift({id:gid(),date:g.date||today(),ticker:t,name:t,sector:'',type:g.newGrade?.toLowerCase().includes('buy')?'upgrade':'downgrade',analyst:g.gradingCompany||'Unknown',from:g.previousGrade||'--',to:g.newGrade||'--',pt:null});n++})}catch{}}
+  log('signal','FMP grades',`${n} signals fetched`);renderS();toast(`${n} grades fetched`,'success')}
+
+async function fetchFH(){if(!D.keys.fh){toast('Set Finnhub key','error');return}
+  const ts=(document.getElementById('fh-t').value||'AAPL').split(',').map(t=>t.trim()).filter(Boolean);let n=0;
+  for(const t of ts.slice(0,10)){try{const r=await fetch(`https://finnhub.io/api/v1/stock/recommendation?symbol=${t}&token=${D.keys.fh}`);const d=await r.json();
+    if(Array.isArray(d)&&d[0]){const l=d[0];D.signals.unshift({id:gid(),date:l.period||today(),ticker:t,name:t,sector:'',type:l.strongBuy+l.buy>l.sell+l.strongSell?'upgrade':'downgrade',analyst:'Finnhub Consensus',from:'--',to:`B:${l.buy} H:${l.hold} S:${l.sell}`,pt:null});n++}}catch{}}
+  log('signal','Finnhub fetch',`${n} recommendations`);renderS();toast(`${n} recommendations`,'success')}
+
+async function fetchYH(){const ts=(document.getElementById('yh-t').value||'AAPL').split(',').map(t=>t.trim()).filter(Boolean);let n=0;
+  for(const t of ts.slice(0,5)){try{const r=await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${t}?range=1d&interval=1d`)}`);const d=await r.json();const m=JSON.parse(d.contents)?.chart?.result?.[0]?.meta;
+    if(m){const ex=D.universe.find(u=>u.t===t.toUpperCase());if(ex)ex.p=m.regularMarketPrice||ex.p;else D.universe.push({id:gid(),t:t.toUpperCase(),n:m.shortName||t,s:'Other',mc:0,pe:0,dy:0,p:m.regularMarketPrice||0,z:rnd(-2,2),beta:1,rsi:50,mom:0});n++}}catch{}}
+  log('signal','Yahoo fetch',`${n} quotes`);renderU();toast(`${n} from Yahoo`,'success')}
+
+async function fetchLive(){if(D.keys.fmp){await fetchFMPGrades()}else if(D.keys.fh){await fetchFH()}else toast('Set API keys in sidebar','error')}
+
+async function runScrape(){const url=document.getElementById('sc-url').value.trim();if(!url||!D.keys.ai){toast('Need URL and OpenAI key','error');return}
+  toast('Scraping...','info');try{const fr=await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);const fd=await fr.json();
+    const r=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${D.keys.ai}`},
+      body:JSON.stringify({model:'gpt-4o-mini',messages:[{role:'user',content:`Extract stock data as JSON array with ticker,name,sector,marketCap,pe,dividendYield,price from:\n${(fd.contents||'').slice(0,6000)}\n${document.getElementById('sc-inst').value}\nReturn ONLY JSON array.`}],temperature:.2,max_tokens:1500})});
+    const d=await r.json();const rows=JSON.parse(d.choices?.[0]?.message?.content?.replace(/```json?\n?|```/g,'').trim()||'[]');
+    if(rows.length){document.getElementById('sc-res').innerHTML=`<div class="card"><div class="ch"><h3>${rows.length} extracted</h3><button class="btn btn-s btn-p" onclick="doImport(window._scR)">Import</button></div></div>`;window._scR=rows;toast(`${rows.length} extracted`,'success')}
+  }catch(e){toast('Scrape failed','error')}}
+
+// ═══════ MACRO ═══════
+function loadMacro(){const vix=rnd(12,28);document.getElementById('m-vix').textContent=vix.toFixed(1);document.getElementById('m-dxy').textContent=rnd(100,108).toFixed(1);document.getElementById('m-10y').textContent=rnd(3.5,5).toFixed(2)+'%';document.getElementById('m-oil').textContent='$'+rnd(65,90).toFixed(1);
+  const reg=vix>25?'Risk-Off':vix>18?'Neutral':'Risk-On';document.getElementById('regime-b').innerHTML=`<div style="text-align:center;padding:12px"><div style="font-size:1.4rem;font-weight:700;font-family:var(--serif);color:${reg==='Risk-On'?'var(--grn)':'var(--red)'}">${reg}</div><div style="font-size:.78rem;color:var(--txt2)">VIX ${vix.toFixed(1)}</div></div>`;
+  const ts=[['3M',rnd(3.5,5)],['1Y',rnd(3.4,4.7)],['2Y',rnd(3.3,4.6)],['5Y',rnd(3.2,4.5)],['10Y',rnd(3.5,5)],['30Y',rnd(3.8,5.2)]];
+  document.getElementById('yc-tbody').innerHTML=ts.map(([t,y])=>{const c=rnd(-.05,.05);return`<tr><td style="font-weight:600">${t}</td><td class="mono">${y.toFixed(2)}%</td><td class="${c>=0?'pos':'neg'} mono">${c>=0?'+':''}${c.toFixed(3)}</td></tr>`}).join('')}
+
+// ═══════ AI CHAT ═══════
+function togChat(){const p=document.getElementById('chat');p.classList.toggle('coll');p.classList.toggle('exp');document.getElementById('ctl').textContent=p.classList.contains('exp')?'Collapse':'Expand'}
+let chatH=[];
+async function chat(){const i=document.getElementById('ci');const m=i.value.trim();if(!m)return;i.value='';addCM('u',m);const lo=m.toLowerCase();
+  if(lo.match(/create.*thesis|new thesis/)){addCM('a','Opening thesis creation...');openNewThesis();return}
+  if(lo.match(/create.*etf|new etf/)){addCM('a','Opening ETF creation...');openNewETF();return}
+  if(lo.match(/submit|pm review/)){submitForReview();addCM('a','Submitted active ETF for PM review.');return}
+  if(lo.match(/backtest/)){const th=D.theses[D.theses.length-1];if(th&&!th.backtested){backtestThesis(th.id);addCM('a',`Backtested "${th.name}"`)}else addCM('a','Go to Theses tab to backtest.');return}
+  if(lo.match(/audit|trail|history/)){nav('audit');addCM('a','Showing audit trail.');return}
+  if(lo.match(/how many|universe size/)){addCM('a',`Universe: ${D.universe.length} stocks. Signals: ${D.signals.length}. Theses: ${D.theses.length}. ETFs: ${D.etfs.length}.`);return}
+  if(lo.match(/which analyst|best analyst/)){const ac={};D.signals.forEach(s=>{if(!ac[s.analyst])ac[s.analyst]={u:0,d:0};if(['upgrade','initiation','pt_raise'].includes(s.type))ac[s.analyst].u++;else ac[s.analyst].d++});
+    const ranked=Object.entries(ac).map(([a,c])=>({a,r:c.u/(c.u+c.d),t:c.u+c.d})).sort((a,b)=>b.r-a.r);
+    addCM('a','**Analyst Signal Quality:**\n'+ranked.slice(0,8).map((r,i)=>`${i+1}. **${r.a}** — ${(r.r*100).toFixed(0)}% bullish (${r.t} signals)`).join('\n'));return}
+  if(lo.match(/suggest|idea|recommend/)){genAISuggestions();addCM('a','Generating strategy suggestions on the dashboard.');return}
+  // AI fallback
+  if(D.keys.ai){addCM('a','<span class="spinner"></span> Thinking...',true);
+    try{const ctx=`Universe: ${D.universe.length} stocks. ${D.theses.length} theses. ${D.etfs.length} ETFs. ${D.signals.length} signals. Active ETF: ${getETF()?.name||'none'} with ${getETF()?.holdings.length||0} holdings.`;
+      const r=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${D.keys.ai}`},
+        body:JSON.stringify({model:'gpt-4o-mini',messages:[{role:'system',content:`You're an AI assistant for an ETF creation platform. Help with thesis creation, stock analysis, signal interpretation. Context: ${ctx}. Be concise.`},...chatH.slice(-6),{role:'user',content:m}],temperature:.5,max_tokens:500})});
+      const d=await r.json();const reply=d.choices?.[0]?.message?.content||'Could not process.';document.querySelector('[data-tmp]')?.remove();addCM('a',reply);chatH.push({role:'user',content:m},{role:'assistant',content:reply});
+    }catch{document.querySelector('[data-tmp]')?.remove();addCM('a','AI request failed.')}}
+  else addCM('a','Set OpenAI key for AI chat. Try: "create thesis", "which analyst is best", "how many stocks", "suggest ideas".');}
+
+function addCM(r,c,tmp=false){const d=document.getElementById('cms');const el=document.createElement('div');el.className='cm '+(r==='u'?'u':'a');if(tmp)el.dataset.tmp='1';
+  el.innerHTML=`<div class="av">${r==='u'?'You':'AI'}</div><div class="bl">${c.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')}</div>`;d.appendChild(el);d.scrollTop=d.scrollHeight;
+  const p=document.getElementById('chat');if(p.classList.contains('coll'))togChat();}
+
+async function genAISuggestions(){
+  const ideas=[
+    {name:'Goldman + MS Upgrade Combo',desc:'Buy stocks upgraded by both Goldman Sachs and Morgan Stanley within 30 days. Dual conviction signal.'},
+    {name:'Dividend Growth Momentum',desc:'High yield (>2%) stocks with recent PT raises. Income + analyst conviction.'},
+    {name:'Contrarian Tech Value',desc:'Buy downgraded tech stocks with P/E < 25. Mean reversion in quality names.'},
+    {name:'Mega-Cap Safe Haven',desc:'$500B+ market cap stocks with any upgrade. Low vol, high liquidity.'},
   ];
-  document.getElementById('thesis-templates').innerHTML=tpls.map(t=>`<div class="strategy-card" style="margin-bottom:8px;padding:12px" onclick="loadThesisTemplate(${JSON.stringify(t).replace(/"/g,'&quot;')})">
-    <h4>${t.name}</h4><p>${t.desc}</p>
-    <div style="font-size:.7rem;color:var(--text-3)">${t.analysts.length?t.analysts.join(', '):'All analysts'} · ${t.types.join(', ')} · ${t.hold}d hold · Max ${t.maxpos}</div>
-  </div>`).join('');
-  // Render analyst checkboxes
-  document.getElementById('th-analyst-picks').innerHTML=ANALYSTS.map(a=>`<label style="display:block;font-size:.78rem;padding:2px 0"><input type="checkbox" value="${a}" class="th-analyst-cb"> ${a}</label>`).join('');
+  document.getElementById('d-suggestions').innerHTML=ideas.map(i=>`<div style="padding:8px 0;border-bottom:1px solid var(--bdr)"><div class="flex jb ac"><b>${i.name}</b><button class="btn btn-s btn-p" onclick="quickThesis('${i.name.replace(/'/g,"\\'")}','${i.desc.replace(/'/g,"\\'")}')">Create Thesis</button></div><div style="font-size:.78rem;color:var(--txt2)">${i.desc}</div></div>`).join('');
 }
+function quickThesis(name,desc){const th={id:gid(),name,description:desc,analysts:[],signalTypes:['upgrade'],holdDays:90,filters:{minMC:10,maxPE:0,minDY:0},backtested:false,backtestResult:null,etfId:null,created:now()};
+  D.theses.push(th);log('thesis','Created from AI suggestion',`"${name}"`);nav('theses');toast('Thesis created','success')}
 
-function loadThesisTemplate(t){
-  document.getElementById('th-name').value=t.name;document.getElementById('th-desc').value=t.desc;
-  document.getElementById('th-hold').value=t.hold;document.getElementById('th-maxpos').value=t.maxpos;
-  // Check signal types
-  document.querySelectorAll('#th-signal-types input').forEach(cb=>cb.checked=t.types.includes(cb.value));
-  // Check analysts
-  document.querySelectorAll('.th-analyst-cb').forEach(cb=>cb.checked=t.analysts.includes(cb.value));
-  if(t.sectors)document.getElementById('th-sectors').value=t.sectors;
-  toast('Template loaded: '+t.name,'info');
-}
+// ═══════ CSV EXPORT ═══════
+function exportCSV(type){let rows=[],h=[];
+  if(type==='universe'){h=['Ticker','Name','Sector','MktCap_B','PE','DivYield','Price'];rows=D.universe.map(s=>[s.t,s.n,s.s,s.mc,s.pe,s.dy,s.p])}
+  else if(type==='signals'){h=['Date','Ticker','Type','Analyst','From','To','PT'];rows=D.signals.map(s=>[s.date,s.ticker,s.type,s.analyst,s.from,s.to,s.pt||''])}
+  else if(type==='etf'){const e=getETF();if(!e)return;h=['Ticker','Name','Sector','Weight','Rationale','Source','AddedBy','AddedAt'];rows=e.holdings.map(x=>[x.ticker,x.name,x.sector,x.weight,x.rationale,x.source,x.addedBy,x.addedAt])}
+  else if(type==='audit'){h=['Timestamp','Type','Action','Detail','User'];rows=D.auditLog.map(a=>[a.ts,a.type,a.action,a.detail,a.user])}
+  const csv=[h.join(','),...rows.map(r=>r.map(c=>typeof c==='string'&&c.includes(',')?`"${c}"`:c).join(','))].join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=`msim-${type}-${today()}.csv`;a.click();toast(`Exported ${rows.length} rows`,'success')}
 
-function getThesisConfig(){
-  const types=[];document.querySelectorAll('#th-signal-types input:checked').forEach(cb=>types.push(cb.value));
-  const analysts=[];document.querySelectorAll('.th-analyst-cb:checked').forEach(cb=>analysts.push(cb.value));
-  const secText=document.getElementById('th-sectors')?.value||'';
-  const sectors=secText?secText.split(',').map(s=>s.trim()).filter(Boolean):[];
-  return{
-    name:document.getElementById('th-name').value||'Untitled Thesis',
-    desc:document.getElementById('th-desc').value||'',
-    signalTypes:types,analysts,holdDays:+document.getElementById('th-hold').value||90,
-    maxPositions:+document.getElementById('th-maxpos').value||20,
-    sizing:document.getElementById('th-sizing').value,
-    stopLoss:+document.getElementById('th-stop').value||15,
-    takeProfit:+document.getElementById('th-tp').value||30,
-    sectors,minMC:+document.getElementById('th-minmc').value||0,
-    minScore:+document.getElementById('th-minscore').value||0
-  };
-}
+// ═══════ MODAL ═══════
+let _mok;function showMod(t,b,ok){_mok=ok;document.getElementById('modal-root').innerHTML=`<div class="mo" onclick="if(event.target===this)closeMod()"><div class="md"><div class="mh"><h3>${t}</h3><button class="btn" onclick="closeMod()">x</button></div><div class="mb">${b}</div><div class="mf"><button class="btn" onclick="closeMod()">Cancel</button><button class="btn btn-p" onclick="_mok&&_mok()">Save</button></div></div></div>`}
+function closeMod(){document.getElementById('modal-root').innerHTML=''}
 
-function simulateBacktest(config,months){
-  // Generate simulated returns based on thesis parameters
-  // More specific analysts = slightly higher returns (conviction)
-  // Upgrade-only = positive skew, downgrades = mean reversion (higher vol)
-  const analystBonus=config.analysts?.length?config.analysts.length*0.15:0;
-  const typeSkew=config.signalTypes?.includes('downgrade')?-0.3:0.4;
-  const holdFactor=config.holdDays>120?0.8:config.holdDays>60?1.0:1.2; // shorter hold = more active
-  const posConcentration=config.maxPositions<15?1.15:config.maxPositions>30?0.85:1;
-  const baseMo=0.8+typeSkew+analystBonus;
-  const vol=1.8*holdFactor*posConcentration;
+function openThesisFromChat(){togChat();document.getElementById('ci').value='create a thesis based on ';document.getElementById('ci').focus()}
 
-  let sR=0,bR=0;const sL=[100],bL=[100];const trades=[];
-  for(let i=0;i<months;i++){
-    const mktReturn=rnd(-2.5,3);
-    const alpha=(baseMo+rnd(-vol,vol))*holdFactor;
-    const stratReturn=mktReturn+alpha;
-    sR=(1+sR/100)*(1+stratReturn/100)*100-100;
-    bR=(1+bR/100)*(1+mktReturn/100)*100-100;
-    sL.push(+(sL[i]*(1+stratReturn/100)).toFixed(2));
-    bL.push(+(bL[i]*(1+mktReturn/100)).toFixed(2));
-    // Simulate some trades
-    if(i%3===0){const stock=pick(TICKERS);trades.push({month:i,ticker:stock.t,entry:rnd(80,500),exit:rnd(80,500),pnl:rnd(-15,25)})}
-  }
-  const maxDD=-rnd(5+(config.signalTypes?.includes('downgrade')?5:0),18);
-  const annRet=sR/(months/12);const annVol=vol*Math.sqrt(12);
-  const sharpe=annVol>0?+(annRet/annVol).toFixed(2):0;
-  const winRate=50+analystBonus*10+typeSkew*15;
-  return{sR,bR,alpha:sR-bR,sL,bL,maxDD,sharpe,months,annRet,trades,winRate:clamp(winRate,30,80),turnover:rnd(50,300),positions:config.maxPositions};
-}
-
-function renderBacktestResults(target,result,config){
-  const {sR,bR,alpha,sL,bL,maxDD,sharpe,months,annRet,trades,winRate,turnover,positions}=result;
-  const verdict=alpha>5?'Strong':alpha>0?'Marginal':alpha>-3?'Neutral':'Underperforming';
-  const verdictColor=alpha>5?'var(--green)':alpha>0?'var(--gold)':alpha>-3?'var(--text-3)':'var(--red)';
-  document.getElementById(target).innerHTML=`
-    <div class="card" style="margin-bottom:12px;border-left:3px solid ${verdictColor}"><div class="card-body" style="padding:12px 16px">
-      <div class="flex justify-between items-center"><div><strong style="font-size:1.1rem;font-family:var(--font-serif)">${config.name||'Backtest'}</strong><span style="margin-left:12px;font-size:.8rem;color:${verdictColor};font-weight:600">${verdict}</span></div>
-      <div class="flex gap-8"><button class="btn btn-sm btn-gold" onclick="convertToETF('${config.name}')">Create ETF from This</button><button class="btn btn-sm" onclick="saveThesisAsStrategy()">Save as Strategy</button></div></div>
-      <div style="font-size:.78rem;color:var(--text-2);margin-top:4px">${config.desc||''}</div>
-      ${config.analysts?.length?`<div style="font-size:.75rem;margin-top:4px">Analysts: <strong>${config.analysts.join(', ')}</strong></div>`:''}
-    </div></div>
-    <div class="stat-row">
-      <div class="stat"><div class="stat-val ${sR>=0?'pos':'neg'}">${fP(sR)}</div><div class="stat-label">Strategy</div></div>
-      <div class="stat"><div class="stat-val ${bR>=0?'pos':'neg'}">${fP(bR)}</div><div class="stat-label">Benchmark</div></div>
-      <div class="stat"><div class="stat-val ${alpha>=0?'pos':'neg'}">${fP(alpha)}</div><div class="stat-label">Alpha</div></div>
-      <div class="stat"><div class="stat-val">${sharpe}</div><div class="stat-label">Sharpe</div></div>
-      <div class="stat"><div class="stat-val neg">${maxDD.toFixed(1)}%</div><div class="stat-label">Max DD</div></div>
-      <div class="stat"><div class="stat-val">${winRate.toFixed(0)}%</div><div class="stat-label">Win Rate</div></div>
-    </div>
-    <div class="grid-2">
-      <div class="card"><div class="card-header"><h3>Equity Curve</h3></div><div class="card-body">
-        <div style="display:flex;gap:1px;align-items:flex-end;height:120px">${sL.map((v,i)=>{const maxV=Math.max(...sL,...bL);return`<div style="flex:1;position:relative"><div style="position:absolute;bottom:0;left:0;right:0;height:${Math.max(2,v/maxV*115)}px;background:var(--primary);border-radius:1px 1px 0 0;opacity:.7"></div><div style="position:absolute;bottom:0;left:0;right:0;height:${Math.max(2,(bL[i]||100)/maxV*115)}px;background:var(--gold);border-radius:1px 1px 0 0;opacity:.4"></div></div>`}).join('')}</div>
-        <div class="flex justify-between" style="font-size:.65rem;color:var(--text-3);margin-top:4px"><span>Month 0</span><div><span style="color:var(--primary)">Strategy</span> <span style="color:var(--gold);margin-left:8px">Benchmark</span></div><span>Month ${months}</span></div>
-      </div></div>
-      <div class="card"><div class="card-header"><h3>Key Metrics</h3></div><div class="card-body">
-        <table><tbody>
-          <tr><td style="font-size:.78rem">Annualized Return</td><td class="mono ${annRet>=0?'pos':'neg'}">${fP(annRet)}</td></tr>
-          <tr><td style="font-size:.78rem">Win Rate</td><td class="mono">${winRate.toFixed(0)}%</td></tr>
-          <tr><td style="font-size:.78rem">Avg Positions</td><td class="mono">${positions}</td></tr>
-          <tr><td style="font-size:.78rem">Turnover</td><td class="mono">${turnover.toFixed(0)}%/yr</td></tr>
-          <tr><td style="font-size:.78rem">Hold Period</td><td class="mono">${config.holdDays||90}d</td></tr>
-          <tr><td style="font-size:.78rem">Signal Types</td><td style="font-size:.75rem">${(config.signalTypes||[]).join(', ')||'All'}</td></tr>
-        </tbody></table>
-      </div></div>
-    </div>
-    ${trades.length?`<div class="card" style="margin-top:12px"><div class="card-header"><h3>Sample Trades</h3></div><div class="card-body" style="padding:0"><table><thead><tr><th>Month</th><th>Ticker</th><th>Entry</th><th>Exit</th><th>P&L %</th></tr></thead><tbody>${trades.slice(0,8).map(t=>`<tr><td class="mono">${t.month}</td><td class="mono" style="font-weight:600">${t.ticker}</td><td class="mono">$${t.entry.toFixed(0)}</td><td class="mono">$${t.exit.toFixed(0)}</td><td class="mono ${t.pnl>=0?'pos':'neg'}">${fP(t.pnl)}</td></tr>`).join('')}</tbody></table></div></div>`:''}`;
-}
-
-function runThesisBacktest(){
-  const config=getThesisConfig();if(!config.signalTypes.length){toast('Select at least one signal type','error');return}
-  const months=24;const result=simulateBacktest(config,months);
-  renderBacktestResults('thesis-results',result,config);
-  S.backtestHistory.unshift({date:today(),name:config.name,type:'thesis',config,...result});
-  toast('Thesis backtest complete','success');
-}
-
-function populateBTStrategySelect(){
-  document.getElementById('bt-strat').innerHTML=S.strategies.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
-}
-
-function runStrategyBacktest(){
-  const stratId=document.getElementById('bt-strat').value;
-  const strat=S.strategies.find(s=>s.id===stratId);if(!strat){toast('Select a strategy','error');return}
-  const months=Math.round((new Date(document.getElementById('bt-end').value)-new Date(document.getElementById('bt-start').value))/(30*864e5));
-  const topN=+document.getElementById('bt-topn').value||20;
-  const config={name:strat.name,desc:strat.desc,signalTypes:strat.signalTypes||['upgrade'],analysts:strat.analysts||[],holdDays:90,maxPositions:topN,sizing:'equal',stopLoss:15,takeProfit:30,sectors:strat.filters.sectors||[],minMC:strat.filters.minMC};
-  const result=simulateBacktest(config,months);
-  renderBacktestResults('strategy-bt-results',result,config);
-  S.backtestHistory.unshift({date:today(),name:strat.name,type:'strategy',config,...result});
-  toast('Strategy backtest complete','success');
-}
-
-function renderBTHistory(){
-  document.getElementById('bt-history-tbody').innerHTML=S.backtestHistory.length?S.backtestHistory.map(h=>`<tr>
-    <td class="mono" style="font-size:.75rem">${h.date}</td><td>${h.name} <span class="badge badge-blue">${h.type}</span></td>
-    <td class="mono ${h.sR>=0?'pos':'neg'}">${fP(h.sR)}</td><td class="mono ${h.alpha>=0?'pos':'neg'}">${fP(h.alpha)}</td>
-    <td class="mono">${h.sharpe}</td><td class="mono neg">${h.maxDD?.toFixed(1)||'--'}%</td>
-    <td><button class="btn btn-sm btn-gold" onclick="convertToETF('${h.name}')">Create ETF</button></td>
-  </tr>`).join(''):'<tr><td colspan="7" class="empty">No backtests run yet</td></tr>';
-}
-
-function saveThesisAsStrategy(){
-  const config=getThesisConfig();
-  const strat={id:gid(),name:config.name,desc:config.desc,factors:[{id:'analyst_rating',weight:50},{id:'momentum',weight:25},{id:'quality',weight:25}],
-    filters:{minMC:config.minMC,maxPE:0,minDY:0,sectors:config.sectors},analysts:config.analysts,signalTypes:config.signalTypes,
-    autoRun:true,color:['var(--primary)','var(--green)','var(--gold)','var(--purple)','var(--blue)','var(--orange)'][S.strategies.length%6]};
-  S.strategies.push(strat);activateStrategy(strat.id);toast('Saved as strategy: '+config.name,'success');
-}
-
-function convertToETF(name){
-  const strat=getActiveStrategy();
-  const ratings=S.ratings[S.activeStrategy]||[];
-  const topN=ratings.filter(r=>r.rating==='Strong Buy'||r.rating==='Buy').slice(0,20);
-  if(!topN.length){toast('No buy-rated stocks to populate ETF','error');return}
-  const etf={id:gid(),name:name+' ETF',ticker:(name||'ETF').replace(/[^A-Z]/gi,'').slice(0,4).toUpperCase(),strategyId:S.activeStrategy,desc:'Auto-created from backtest: '+name,holdings:topN.map(r=>({ticker:r.t,name:r.n,sector:r.s,weight:+(100/topN.length).toFixed(1)}))};
-  S.etfs.push(etf);S.activeETF=etf.id;toast('ETF created with '+topN.length+' holdings: '+etf.ticker,'success');nav('etfs');
-}
-
-async function aiStructureThesis(){
-  const desc=document.getElementById('th-desc').value.trim();
-  if(!desc){toast('Describe your thesis first','error');return}
-  if(!S.keys.ai){toast('Set OpenAI key for AI structuring','error');return}
-  toast('AI structuring your thesis...','info');
-  try{
-    const r=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${S.keys.ai}`},
-      body:JSON.stringify({model:'gpt-4o-mini',messages:[{role:'system',content:`You structure investment thesis descriptions into parameters. Available analysts: ${ANALYSTS.join(', ')}. Available signal types: upgrade, downgrade, initiation, pt_raise, pt_cut. Return JSON only: {"name":"...","signalTypes":["upgrade"],"analysts":["Goldman Sachs"],"holdDays":90,"maxPositions":20,"sizing":"equal|score|conviction","stopLoss":15,"takeProfit":30,"sectors":["Technology"],"minMC":10}`},{role:'user',content:desc}],temperature:0.3,max_tokens:300})});
-    const data=await r.json();const content=data.choices?.[0]?.message?.content||'';
-    const cleaned=content.replace(/```json?\n?/g,'').replace(/```/g,'').trim();
-    const parsed=JSON.parse(cleaned);
-    // Apply to form
-    if(parsed.name)document.getElementById('th-name').value=parsed.name;
-    if(parsed.holdDays)document.getElementById('th-hold').value=parsed.holdDays;
-    if(parsed.maxPositions)document.getElementById('th-maxpos').value=parsed.maxPositions;
-    if(parsed.stopLoss)document.getElementById('th-stop').value=parsed.stopLoss;
-    if(parsed.takeProfit)document.getElementById('th-tp').value=parsed.takeProfit;
-    if(parsed.minMC)document.getElementById('th-minmc').value=parsed.minMC;
-    if(parsed.sectors?.length)document.getElementById('th-sectors').value=parsed.sectors.join(', ');
-    if(parsed.sizing)document.getElementById('th-sizing').value=parsed.sizing;
-    if(parsed.signalTypes)document.querySelectorAll('#th-signal-types input').forEach(cb=>cb.checked=parsed.signalTypes.includes(cb.value));
-    if(parsed.analysts)document.querySelectorAll('.th-analyst-cb').forEach(cb=>cb.checked=parsed.analysts.includes(cb.value));
-    toast('AI structured your thesis. Review and run backtest.','success');
-  }catch(e){toast('AI structuring failed: '+e.message,'error')}
-}
-
-async function generateAIIdeas(){
-  const list=document.getElementById('ai-ideas-list');
-  if(!S.keys.ai){
-    // Generate locally without AI
-    const ideas=[
-      {name:'Sector Rotation Alpha',thesis:'Overweight the top 3 sectors by Z-score momentum, underweight bottom 3. Rebalance monthly. Captures mean-reversion at sector level.',analysts:[],types:['upgrade'],hold:30,conviction:'Medium'},
-      {name:'Earnings Surprise Catcher',thesis:'Buy stocks within 48h of analyst upgrades that follow positive earnings surprises. These tend to have sustained momentum for 60-90 days.',analysts:['Goldman Sachs','Morgan Stanley','JP Morgan'],types:['upgrade','pt_raise'],hold:60,conviction:'High'},
-      {name:'Dividend Growth + Quality',thesis:'Combine high dividend yield (>2%) with quality scores. Only buy if at least one analyst has an Outperform rating. Low turnover, defensive.',analysts:[],types:['upgrade','initiation'],hold:180,conviction:'Medium'},
-      {name:'Contrarian Deep Value',thesis:'Buy stocks with P/E under 12 that have been recently downgraded. Mean reversion play — analysts often over-react to short-term negatives.',analysts:[],types:['downgrade'],hold:120,conviction:'High Risk'},
-      {name:'Mega-Cap Momentum',thesis:'Only trade stocks >$500B market cap. Follow any analyst upgrade. These names have liquidity, lower vol, and institutional backing.',analysts:[],types:['upgrade','pt_raise'],hold:90,conviction:'Low Risk'},
-      {name:'Multi-Analyst Consensus',thesis:'Only buy when 3+ different analysts upgrade within 30 days. Strong consensus signal, reduces false positives. Higher conviction but fewer trades.',analysts:[],types:['upgrade','initiation'],hold:90,conviction:'High'},
-    ];
-    list.innerHTML=ideas.map(idea=>`<div class="strategy-card" style="margin-bottom:8px;padding:12px">
-      <div class="flex justify-between items-center"><h4>${idea.name}</h4><span class="badge ${idea.conviction==='High'?'badge-green':idea.conviction==='High Risk'?'badge-red':idea.conviction==='Low Risk'?'badge-blue':'badge-orange'}">${idea.conviction}</span></div>
-      <p style="margin:6px 0">${idea.thesis}</p>
-      <div style="font-size:.7rem;color:var(--text-3)">${idea.analysts.length?idea.analysts.join(', '):'All analysts'} · ${idea.types.join(', ')} · ${idea.hold}d hold</div>
-      <div style="margin-top:8px" class="flex gap-8"><button class="btn btn-sm btn-primary" onclick="loadIdeaToThesis(${JSON.stringify(idea).replace(/"/g,'&quot;')})">Load into Thesis Builder</button><button class="btn btn-sm" onclick="quickBacktestIdea(${JSON.stringify(idea).replace(/"/g,'&quot;')})">Quick Backtest</button></div>
-    </div>`).join('');
-    toast('6 AI-generated ideas ready','success');return;
-  }
-  list.innerHTML='<div style="text-align:center;padding:20px"><span class="spinner"></span> AI generating strategy ideas...</div>';
-  try{
-    const topSectors=SECTORS.slice(0,5);const sigSummary=`${S.signals.filter(s=>s.type==='upgrade').length} upgrades, ${S.signals.filter(s=>s.type==='downgrade').length} downgrades in feed`;
-    const r=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${S.keys.ai}`},
-      body:JSON.stringify({model:'gpt-4o-mini',messages:[{role:'system',content:`Generate 5 creative ETF strategy ideas as JSON array. Each: {"name":"...","thesis":"2-3 sentence description","analysts":["Goldman Sachs"],"types":["upgrade"],"hold":90,"conviction":"High|Medium|Low Risk|High Risk"}. Available analysts: ${ANALYSTS.join(', ')}. Signal types: upgrade, downgrade, initiation, pt_raise, pt_cut. Current signal feed: ${sigSummary}. Universe: ${S.universe.length} stocks across ${topSectors.join(', ')}. Be creative — include at least one contrarian idea and one sector-specific idea.`},{role:'user',content:'Generate 5 unique ETF strategy ideas'}],temperature:0.8,max_tokens:1000})});
-    const data=await r.json();const content=data.choices?.[0]?.message?.content||'[]';
-    const ideas=JSON.parse(content.replace(/```json?\n?/g,'').replace(/```/g,'').trim());
-    list.innerHTML=ideas.map(idea=>`<div class="strategy-card" style="margin-bottom:8px;padding:12px">
-      <div class="flex justify-between items-center"><h4>${idea.name}</h4><span class="badge ${idea.conviction==='High'?'badge-green':idea.conviction==='High Risk'?'badge-red':idea.conviction==='Low Risk'?'badge-blue':'badge-orange'}">${idea.conviction}</span></div>
-      <p style="margin:6px 0">${idea.thesis}</p>
-      <div style="font-size:.7rem;color:var(--text-3)">${(idea.analysts||[]).join(', ')||'All analysts'} · ${(idea.types||[]).join(', ')} · ${idea.hold||90}d hold</div>
-      <div style="margin-top:8px" class="flex gap-8"><button class="btn btn-sm btn-primary" onclick="loadIdeaToThesis(${JSON.stringify(idea).replace(/"/g,'&quot;')})">Load into Thesis</button><button class="btn btn-sm" onclick="quickBacktestIdea(${JSON.stringify(idea).replace(/"/g,'&quot;')})">Quick Backtest</button></div>
-    </div>`).join('');
-    toast(`${ideas.length} AI ideas generated`,'success');
-  }catch(e){list.innerHTML='<div class="empty">AI generation failed. Try again.</div>';toast('Failed: '+e.message,'error')}
-}
-
-function loadIdeaToThesis(idea){
-  showBTTab('thesis');
-  document.getElementById('th-name').value=idea.name||'';
-  document.getElementById('th-desc').value=idea.thesis||'';
-  document.getElementById('th-hold').value=idea.hold||90;
-  if(idea.types)document.querySelectorAll('#th-signal-types input').forEach(cb=>cb.checked=idea.types.includes(cb.value));
-  if(idea.analysts)document.querySelectorAll('.th-analyst-cb').forEach(cb=>cb.checked=idea.analysts.includes(cb.value));
-  toast('Loaded: '+idea.name,'info');
-}
-
-function quickBacktestIdea(idea){
-  const config={name:idea.name,desc:idea.thesis,signalTypes:idea.types||['upgrade'],analysts:idea.analysts||[],holdDays:idea.hold||90,maxPositions:20,sizing:'equal',stopLoss:15,takeProfit:30,sectors:[],minMC:10,minScore:0};
-  const result=simulateBacktest(config,24);
-  showBTTab('thesis');
-  renderBacktestResults('thesis-results',result,config);
-  S.backtestHistory.unshift({date:today(),name:config.name,type:'idea',config,...result});
-  toast('Quick backtest: '+config.name,'success');
-}
-
-// ═══════════════════════════════════════════
-//  UNIVERSE
-// ═══════════════════════════════════════════
-function initUniverse(){
-  S.universe=TICKERS.map(t=>({...t,id:gid(),z:rnd(-2.5,2.5),beta:rnd(0.6,1.8),rsi:rndI(20,80),momentum:rnd(-15,25),dy:t.dy,custom:{}}));
-  const sel=document.getElementById('u-sector');SECTORS.forEach(s=>sel.innerHTML+=`<option value="${s}">${s}</option>`);
-}
-
-function renderUniverse(){
-  const search=(document.getElementById('u-search')?.value||'').toLowerCase();const sec=document.getElementById('u-sector')?.value||'';
-  let data=S.universe.filter(s=>{if(search&&!s.t.toLowerCase().includes(search)&&!s.n.toLowerCase().includes(search))return false;if(sec&&s.s!==sec)return false;return true});
-  document.getElementById('u-count').textContent=S.universe.length;
-  document.getElementById('u-sectors').textContent=new Set(S.universe.map(s=>s.s)).size;
-  const pes=S.universe.filter(s=>s.pe>0);document.getElementById('u-avgpe').textContent=pes.length?(pes.reduce((a,s)=>a+s.pe,0)/pes.length).toFixed(1):'--';
-  document.getElementById('u-totalmc').textContent='$'+fN(S.universe.reduce((a,s)=>a+s.mc,0)*1e9);
-  document.getElementById('universe-tbody').innerHTML=data.map(s=>{
-    const customCols=Object.entries(s.custom||{}).map(([k,v])=>`<span class="tag">${k}:${v}</span>`).join(' ');
-    return`<tr><td class="mono" style="font-weight:700">${s.t}</td><td>${s.n}</td><td><span class="tag">${s.s}</span></td><td class="mono">${fN(s.mc*1e9)}</td><td class="mono">${s.pe>0?s.pe.toFixed(1):'N/A'}</td><td class="mono">${s.dy.toFixed(1)}%</td><td class="mono">$${s.p?.toFixed(2)||'--'}</td><td style="font-size:.7rem">${customCols||'--'}</td></tr>`}).join('');
-}
-
-// ═══════════════════════════════════════════
-//  DATA HUB
-// ═══════════════════════════════════════════
-function showDataTab(id){['upload','api','scrape','history'].forEach(t=>{document.getElementById('data-'+t)?.classList.toggle('hidden',t!==id)});
-  document.querySelectorAll('#panel-datahub .tab').forEach((t,i)=>t.classList.toggle('active',['upload','api','scrape','history'][i]===id));
-  if(id==='history')renderImportHistory();
-}
-
-function handleFileUpload(e){
-  const file=e.target.files[0];if(!file)return;
-  const reader=new FileReader();const ext=file.name.split('.').pop().toLowerCase();
-  reader.onload=ev=>{
-    try{let rows=[];
-      if(ext==='json'){rows=JSON.parse(ev.target.result);if(!Array.isArray(rows))rows=[rows]}
-      else if(ext==='csv'||ext==='tsv'||ext==='txt'){rows=parseCSV(ev.target.result,ext==='tsv'?'\t':',')}
-      else{toast('Unsupported file type. Use CSV, JSON, or TSV.','error');return}
-      const preview=document.getElementById('upload-preview');
-      preview.innerHTML=`<div class="card"><div class="card-header"><h3>Preview (${rows.length} rows)</h3><button class="btn btn-sm btn-primary" onclick="importData(window._uploadRows)">Import</button></div><div class="card-body" style="padding:0;max-height:200px;overflow-y:auto"><table><thead><tr>${Object.keys(rows[0]||{}).map(k=>`<th>${k}</th>`).join('')}</tr></thead><tbody>${rows.slice(0,10).map(r=>`<tr>${Object.values(r).map(v=>`<td class="mono">${v??''}</td>`).join('')}</tr>`).join('')}</tbody></table></div></div>`;
-      window._uploadRows=rows;
-    }catch(err){toast('Parse error: '+err.message,'error')}
-  };
-  if(ext==='xlsx'||ext==='xls')toast('Excel files require the SheetJS library. Use CSV or JSON instead, or paste data directly.','error');
-  else reader.readAsText(file);
-}
-
-function parseCSV(text,delim=','){
-  const lines=text.trim().split('\n');if(lines.length<2)return[];
-  const headers=lines[0].split(delim).map(h=>h.trim().replace(/^"|"$/g,''));
-  return lines.slice(1).map(line=>{const vals=line.split(delim);const obj={};headers.forEach((h,i)=>obj[h]=vals[i]?.trim().replace(/^"|"$/g,'')||'');return obj});
-}
-
-function parsePastedData(){
-  const text=document.getElementById('paste-data').value.trim();if(!text){toast('No data to import','error');return}
-  let rows=[];
-  try{rows=JSON.parse(text);if(!Array.isArray(rows))rows=[rows]}catch{
-    const delim=text.includes('\t')?'\t':',';rows=parseCSV(text,delim);
-  }
-  if(!rows.length){toast('Could not parse data','error');return}
-  importData(rows);
-}
-
-function importData(rows){
-  if(!rows||!rows.length){toast('No rows','error');return}
-  const colMap={ticker:['ticker','symbol','code','stock'],name:['name','company','companyname','company_name'],sector:['sector','industry','gics'],mc:['marketcap','market_cap','mktcap','mc'],pe:['pe','p_e','pe_ratio','priceearnings'],dy:['dividendyield','div_yield','divyield','dy','yield'],p:['price','close','last','lastprice']};
-  function findCol(row,aliases){for(const a of aliases){for(const k of Object.keys(row)){if(k.toLowerCase().replace(/[^a-z]/g,'')===a.replace(/[^a-z]/g,''))return k}}return null}
-  const replace=document.getElementById('upload-replace')?.checked;
-  let added=0;
-  rows.forEach(row=>{
-    const tCol=findCol(row,colMap.ticker);const nCol=findCol(row,colMap.name);
-    const ticker=(row[tCol]||'').toUpperCase().trim();if(!ticker)return;
-    const existing=S.universe.find(u=>u.t===ticker);
-    const data={t:ticker,n:row[nCol]||ticker,s:row[findCol(row,colMap.sector)]||'Other',mc:parseFloat(row[findCol(row,colMap.mc)])||100,pe:parseFloat(row[findCol(row,colMap.pe)])||0,dy:parseFloat(row[findCol(row,colMap.dy)])||0,p:parseFloat(row[findCol(row,colMap.p)])||0};
-    // Extra columns → custom
-    const custom={};const knownCols=new Set([tCol,nCol,findCol(row,colMap.sector),findCol(row,colMap.mc),findCol(row,colMap.pe),findCol(row,colMap.dy),findCol(row,colMap.p)].filter(Boolean));
-    Object.keys(row).forEach(k=>{if(!knownCols.has(k)&&row[k])custom[k]=row[k]});
-    if(existing&&!replace){Object.assign(existing,data,{custom:{...existing.custom,...custom}});added++}
-    else if(!existing){S.universe.push({...data,id:gid(),z:rnd(-2,2),beta:rnd(0.6,1.8),rsi:rndI(20,80),momentum:rnd(-10,15),custom});added++}
-  });
-  if(replace){/* already handled */}
-  S.importHistory.push({date:today(),source:'Upload',records:added,status:'success'});
-  renderUniverse();runAutoScore();toast(`Imported ${added} stocks`,'success');
-}
-
-function renderImportHistory(){
-  const stb={success:'badge-green',error:'badge-red',partial:'badge-orange'};
-  document.getElementById('import-history-tbody').innerHTML=S.importHistory.length?S.importHistory.map(h=>`<tr><td class="mono">${h.date}</td><td>${h.source}</td><td class="mono">${h.records}</td><td><span class="badge ${stb[h.status]}">${h.status}</span></td></tr>`).join(''):'<tr><td colspan="4" class="empty">No imports yet</td></tr>';
-}
-
-// API Fetches
-function saveKeys(){S.keys.ai=document.getElementById('aiKey').value.trim();S.keys.fmp=document.getElementById('fmpKey').value.trim();S.keys.finnhub=document.getElementById('finnhubKey').value.trim();S.keys.av=document.getElementById('avKey').value.trim();
-  document.getElementById('fmp-status').textContent=S.keys.fmp?'Connected':'Not Connected';document.getElementById('fmp-status').className='badge '+(S.keys.fmp?'badge-green':'');
-  document.getElementById('fh-status').textContent=S.keys.finnhub?'Connected':'Not Connected';document.getElementById('fh-status').className='badge '+(S.keys.finnhub?'badge-green':'');
-  document.getElementById('av-status').textContent=S.keys.av?'Connected':'Not Connected';document.getElementById('av-status').className='badge '+(S.keys.av?'badge-green':'');
-  toast('Keys saved','success');
-}
-
-async function fetchFMPData(){
-  if(!S.keys.fmp){toast('Set FMP key','error');return}
-  const tickers=(document.getElementById('fmp-tickers').value||'AAPL,MSFT').split(',').map(t=>t.trim()).filter(Boolean);
-  toast('Fetching FMP quotes...','info');
-  try{const r=await fetch(`https://financialmodelingprep.com/api/v3/quote/${tickers.join(',')}?apikey=${S.keys.fmp}`);
-    const data=await r.json();if(!Array.isArray(data)){toast('FMP error','error');return}
-    data.forEach(q=>{const ex=S.universe.find(u=>u.t===q.symbol);
-      if(ex){ex.p=q.price;ex.pe=q.pe||ex.pe;ex.mc=(q.marketCap||0)/1e9||ex.mc;ex.dy=q.earningsAnnouncement?ex.dy:ex.dy}
-      else S.universe.push({id:gid(),t:q.symbol,n:q.name||q.symbol,s:q.exchange||'Other',mc:(q.marketCap||0)/1e9,pe:q.pe||0,dy:0,p:q.price||0,z:rnd(-2,2),beta:rnd(.6,1.8),rsi:rndI(20,80),momentum:q.changesPercentage||0,custom:{}})});
-    S.importHistory.push({date:today(),source:'FMP Quotes',records:data.length,status:'success'});
-    renderUniverse();runAutoScore();toast(`Updated ${data.length} stocks from FMP`,'success');
-  }catch(e){toast('FMP fetch failed','error')}
-}
-
-async function fetchFMPGrades(){
-  if(!S.keys.fmp){toast('Set FMP key','error');return}
-  const tickers=(document.getElementById('fmp-tickers').value||'AAPL').split(',').map(t=>t.trim()).filter(Boolean);
-  toast('Fetching grades...','info');let total=0;
-  for(const t of tickers.slice(0,5)){try{const r=await fetch(`https://financialmodelingprep.com/api/v3/grade/${t}?limit=5&apikey=${S.keys.fmp}`);
-    const data=await r.json();if(Array.isArray(data))data.forEach(g=>{S.signals.unshift({id:gid(),date:g.date||today(),ticker:t,name:t,sector:'',type:g.newGrade?.toLowerCase().includes('buy')?'upgrade':'downgrade',analyst:g.gradingCompany||'Unknown',from:g.previousGrade||'--',to:g.newGrade||'--',pt:null,pushed:false});total++})}catch{}}
-  toast(`Fetched ${total} grades`,'success');renderSignals();
-}
-
-async function fetchFMPScreener(){
-  if(!S.keys.fmp){toast('Set FMP key','error');return}
-  toast('Running FMP screener...','info');
-  try{const r=await fetch(`https://financialmodelingprep.com/api/v3/stock-screener?marketCapMoreThan=10000000000&limit=100&apikey=${S.keys.fmp}`);
-    const data=await r.json();if(!Array.isArray(data)){toast('Screener error','error');return}
-    let added=0;data.forEach(q=>{if(!S.universe.find(u=>u.t===q.symbol)){
-      S.universe.push({id:gid(),t:q.symbol,n:q.companyName||q.symbol,s:q.sector||'Other',mc:(q.marketCap||0)/1e9,pe:q.pe||0,dy:q.lastAnnualDividend||0,p:q.price||0,z:rnd(-2,2),beta:q.beta||rnd(.6,1.8),rsi:rndI(20,80),momentum:rnd(-10,15),custom:{}});added++}});
-    S.importHistory.push({date:today(),source:'FMP Screener',records:added,status:'success'});
-    renderUniverse();runAutoScore();toast(`Added ${added} new stocks from FMP screener`,'success');
-  }catch{toast('Screener failed','error')}
-}
-
-async function fetchFinnhubData(){
-  if(!S.keys.finnhub){toast('Set Finnhub key','error');return}
-  const tickers=(document.getElementById('fh-tickers').value||'AAPL').split(',').map(t=>t.trim()).filter(Boolean);
-  toast('Fetching Finnhub...','info');let total=0;
-  for(const t of tickers.slice(0,10)){try{const r=await fetch(`https://finnhub.io/api/v1/stock/recommendation?symbol=${t}&token=${S.keys.finnhub}`);
-    const data=await r.json();if(Array.isArray(data)&&data.length){const latest=data[0];
-      S.signals.unshift({id:gid(),date:latest.period||today(),ticker:t,name:t,sector:'',type:latest.strongBuy+latest.buy>latest.sell+latest.strongSell?'upgrade':'downgrade',analyst:'Finnhub Consensus',from:'--',to:`Buy:${latest.buy} Hold:${latest.hold} Sell:${latest.sell}`,pt:null,pushed:false});total++}}catch{}}
-  S.importHistory.push({date:today(),source:'Finnhub',records:total,status:'success'});
-  renderSignals();toast(`Fetched ${total} recommendations`,'success');
-}
-
-async function fetchAVData(){
-  if(!S.keys.av){toast('Set Alpha Vantage key','error');return}
-  const t=document.getElementById('av-ticker').value.trim()||'AAPL';
-  toast('Fetching Alpha Vantage...','info');
-  try{const r=await fetch(`https://www.alphavantage.co/query?function=OVERVIEW&symbol=${t}&apikey=${S.keys.av}`);
-    const d=await r.json();if(d.Symbol){
-      const ex=S.universe.find(u=>u.t===d.Symbol);const upd={mc:parseFloat(d.MarketCapitalization)/1e9||0,pe:parseFloat(d.PERatio)||0,dy:parseFloat(d.DividendYield)*100||0,p:parseFloat(d['50DayMovingAverage'])||0};
-      if(ex)Object.assign(ex,upd);else S.universe.push({id:gid(),t:d.Symbol,n:d.Name||d.Symbol,s:d.Sector||'Other',...upd,z:rnd(-2,2),beta:parseFloat(d.Beta)||1,rsi:rndI(20,80),momentum:rnd(-10,15),custom:{industry:d.Industry||'',exchange:d.Exchange||''}});
-      S.importHistory.push({date:today(),source:'Alpha Vantage',records:1,status:'success'});renderUniverse();runAutoScore();toast(`Updated ${d.Symbol}`,'success')}}catch{toast('AV fetch failed','error')}
-}
-
-async function fetchYahooData(){
-  const tickers=(document.getElementById('yahoo-tickers').value||'AAPL').split(',').map(t=>t.trim()).filter(Boolean);
-  toast('Fetching Yahoo...','info');let total=0;
-  for(const t of tickers.slice(0,5)){try{const r=await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${t}?range=1d&interval=1d`)}`);
-    const d=await r.json();const parsed=JSON.parse(d.contents);const meta=parsed?.chart?.result?.[0]?.meta;
-    if(meta){const ex=S.universe.find(u=>u.t===t.toUpperCase());
-      if(ex){ex.p=meta.regularMarketPrice||ex.p}
-      else S.universe.push({id:gid(),t:t.toUpperCase(),n:meta.shortName||t,s:'Other',mc:0,pe:0,dy:0,p:meta.regularMarketPrice||0,z:rnd(-2,2),beta:1,rsi:rndI(20,80),momentum:rnd(-5,10),custom:{}});total++}}catch{}}
-  if(total){S.importHistory.push({date:today(),source:'Yahoo Finance',records:total,status:'success'});renderUniverse();runAutoScore()}
-  toast(`Updated ${total} from Yahoo`,'success');
-}
-
-async function runScrape(){
-  const url=document.getElementById('scrape-url').value.trim();if(!url){toast('Enter a URL','error');return}
-  const instructions=document.getElementById('scrape-instructions').value.trim();
-  if(!S.keys.ai){toast('Set OpenAI key for AI-powered scraping','error');
-    // Try basic fetch
-    toast('Attempting basic fetch...','info');
-    try{const r=await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);const d=await r.json();
-      document.getElementById('scrape-results').innerHTML=`<div class="card"><div class="card-body"><pre style="max-height:200px;overflow:auto;font-size:.72rem">${(d.contents||'').slice(0,3000).replace(/</g,'&lt;')}</pre><p style="font-size:.78rem;color:var(--text-2);margin-top:8px">Raw HTML returned. Set an OpenAI API key for AI-powered extraction.</p></div></div>`;
-    }catch{toast('Fetch failed','error')}return;
-  }
-  toast('Scraping with AI...','info');
-  try{
-    const fetchR=await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);const fetchD=await fetchR.json();const html=(fetchD.contents||'').slice(0,8000);
-    const prompt=`Extract structured stock/company data from this web page content as a JSON array. Each item should have: ticker, name, sector, marketCap, pe, dividendYield, price (as many fields as available). ${instructions?'Additional instructions: '+instructions:''}
-
-Web page content:
-${html}
-
-Return ONLY a valid JSON array, no markdown.`;
-    const aiR=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${S.keys.ai}`},
-      body:JSON.stringify({model:'gpt-4o-mini',messages:[{role:'user',content:prompt}],temperature:0.2,max_tokens:2000})});
-    const aiD=await aiR.json();const content=aiD.choices?.[0]?.message?.content||'';
-    const cleaned=content.replace(/```json?\n?/g,'').replace(/```/g,'').trim();
-    const rows=JSON.parse(cleaned);
-    if(Array.isArray(rows)&&rows.length){
-      document.getElementById('scrape-results').innerHTML=`<div class="card"><div class="card-header"><h3>Extracted ${rows.length} records</h3><button class="btn btn-sm btn-primary" onclick="importData(window._scrapeRows)">Import to Universe</button></div><div class="card-body" style="padding:0;max-height:200px;overflow-y:auto"><table><thead><tr>${Object.keys(rows[0]).map(k=>`<th>${k}</th>`).join('')}</tr></thead><tbody>${rows.slice(0,20).map(r=>`<tr>${Object.values(r).map(v=>`<td class="mono">${v??''}</td>`).join('')}</tr>`).join('')}</tbody></table></div></div>`;
-      window._scrapeRows=rows;toast(`Extracted ${rows.length} records`,'success');
-    }else toast('No structured data found','error');
-  }catch(e){toast('Scrape failed: '+e.message,'error')}
-}
-
-// ═══════════════════════════════════════════
-//  MACRO
-// ═══════════════════════════════════════════
-function loadMacro(){
-  const vix=rnd(12,28);document.getElementById('m-vix').textContent=vix.toFixed(1);
-  document.getElementById('m-dxy').textContent=rnd(100,108).toFixed(1);
-  document.getElementById('m-10y').textContent=rnd(3.5,5).toFixed(2)+'%';
-  document.getElementById('m-oil').textContent='$'+rnd(65,90).toFixed(1);
-  const regime=vix>25?'Risk-Off':vix>18?'Neutral':'Risk-On';
-  document.getElementById('regime-body').innerHTML=`<div style="text-align:center;padding:16px"><div style="font-size:1.5rem;font-weight:700;font-family:var(--font-serif);color:${regime==='Risk-On'?'var(--green)':regime==='Risk-Off'?'var(--red)':'var(--text)'}">${regime}</div><div style="font-size:.8rem;color:var(--text-2);margin-top:4px">VIX ${vix.toFixed(1)}</div></div>`;
-  const tenors=[['3M',rnd(3.5,5)],['6M',rnd(3.5,4.8)],['1Y',rnd(3.4,4.7)],['2Y',rnd(3.3,4.6)],['5Y',rnd(3.2,4.5)],['10Y',rnd(3.5,5)],['30Y',rnd(3.8,5.2)]];
-  document.getElementById('yield-tbody').innerHTML=tenors.map(([t,y])=>{const c=rnd(-.05,.05);return`<tr><td style="font-weight:600">${t}</td><td class="mono">${y.toFixed(2)}%</td><td class="${c>=0?'pos':'neg'} mono">${c>=0?'+':''}${c.toFixed(3)}</td></tr>`}).join('');
-}
-
-// ═══════════════════════════════════════════
-//  AI CHAT
-// ═══════════════════════════════════════════
-function toggleChat(){const pane=document.getElementById('chat-pane');pane.classList.toggle('collapsed');pane.classList.toggle('expanded');document.getElementById('chat-toggle-label').textContent=pane.classList.contains('expanded')?'Click to collapse':'Click to expand'}
-
-async function sendChat(){
-  const input=document.getElementById('chat-input');const msg=input.value.trim();if(!msg)return;input.value='';
-  addChatMsg('user',msg);
-  // Try local commands first
-  const lower=msg.toLowerCase();
-  if(lower.includes('score all')||lower.includes('re-score')){runAutoScore();addChatMsg('ai','Done! Re-scored all companies using the active strategy.');return}
-  if(lower.includes('push buys')||lower.includes('push to trades')){pushBuysToTrades();addChatMsg('ai','Pushed all Buy-rated stocks to Trade Proposals.');return}
-  if(lower.includes('approve all')){approveAll();addChatMsg('ai','Approved all pending trade proposals.');return}
-  if(lower.match(/how many (stocks|companies)/)){addChatMsg('ai',`Universe has ${S.universe.length} stocks across ${new Set(S.universe.map(s=>s.s)).size} sectors.`);return}
-  if(lower.match(/top \d+ (stocks|rated|buy)/)){const n=parseInt(lower.match(/top (\d+)/)[1])||10;const data=S.ratings[S.activeStrategy]||[];const top=data.slice(0,n);addChatMsg('ai',`Top ${n} by ${getActiveStrategy()?.name}:\n\n${top.map((r,i)=>`${i+1}. **${r.t}** ${r.n} — Score: ${r.composite} (${r.rating})`).join('\n')}`);return}
-  if(lower.match(/why.*(rated|score|rating)/i)){const tickerMatch=msg.match(/\b([A-Z]{1,5})\b/);if(tickerMatch){aiExplainRating(tickerMatch[1]);return}}
-  if(lower.includes('create strategy')){addChatMsg('ai','Opening the strategy creation dialog...');openNewStrategy();return}
-  if(lower.includes('create etf')){addChatMsg('ai','Opening the ETF creation dialog...');openNewETF();return}
-  if(lower.match(/backtest|back.?test|test.*thesis/)){addChatMsg('ai','Opening the Backtest Lab...');nav('backtest');return}
-  if(lower.match(/generate.*idea|suggest.*strateg|ai.*idea/)){addChatMsg('ai','Generating AI strategy ideas...');nav('backtest');showBTTab('ideas');generateAIIdeas();return}
-  if(lower.match(/follow.*goldman|goldman.*upgrade/)){addChatMsg('ai','Loading Goldman Sachs upgrade thesis...');nav('backtest');showBTTab('thesis');setTimeout(()=>loadIdeaToThesis({name:'Follow Goldman Upgrades',thesis:'Buy any stock Goldman Sachs upgrades. 90-day hold.',analysts:['Goldman Sachs'],types:['upgrade'],hold:90}),200);return}
-  if(lower.match(/which analyst|best analyst|analyst performance/)){const analystCounts={};S.signals.forEach(s=>{if(!analystCounts[s.analyst])analystCounts[s.analyst]={up:0,down:0};if(['upgrade','initiation','pt_raise'].includes(s.type))analystCounts[s.analyst].up++;else analystCounts[s.analyst].down++});const ranked=Object.entries(analystCounts).map(([a,c])=>({a,ratio:c.up/(c.up+c.down),total:c.up+c.down})).sort((a,b)=>b.ratio-a.ratio);addChatMsg('ai',`**Analyst Signal Quality (from current feed):**\n\n${ranked.slice(0,8).map((r,i)=>`${i+1}. **${r.a}** — ${(r.ratio*100).toFixed(0)}% bullish (${r.total} signals)`).join('\n')}\n\nTry: "Follow Goldman upgrades" or go to Backtest Lab to test specific analysts.`);return}
-  if(lower.match(/compare.*strateg/)){const results=S.strategies.map(s=>{const r=S.ratings[s.id]||[];const buys=r.filter(x=>x.rating==='Strong Buy'||x.rating==='Buy').length;return`- **${s.name}**: ${r.length} scored, ${buys} buys, avg composite ${r.length?(r.reduce((a,x)=>a+x.composite,0)/r.length).toFixed(1):'--'}`}).join('\n');addChatMsg('ai',`**Strategy Comparison:**\n\n${results}\n\nGo to Backtest Lab → Strategy Backtest to test historical performance.`);return}
-  // Try AI
-  if(S.keys.ai){
-    addChatMsg('ai','<span class="spinner"></span> Thinking...',true);
-    try{
-      const strat=getActiveStrategy();
-      const topStocks=(S.ratings[S.activeStrategy]||[]).slice(0,10).map(r=>`${r.t}(${r.composite}/${r.rating})`).join(', ');
-      const context=`Platform state: ${S.universe.length} stocks, ${S.strategies.length} strategies, active: "${strat?.name||'none'}". Top rated: ${topStocks}. ETFs: ${S.etfs.length}. Pending trades: ${S.trades.filter(t=>t.status==='pending').length}. Factors available: ${FACTOR_CATALOG.map(f=>f.label).join(', ')}.`;
-      const r=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${S.keys.ai}`},
-        body:JSON.stringify({model:'gpt-4o-mini',messages:[
-          {role:'system',content:`You are an AI research assistant for an institutional ETF creation platform. You help analyze stocks, explain ratings, suggest strategies, and answer investment questions. Be concise and data-driven. Use markdown bold for emphasis. Context: ${context}`},
-          ...S.chatHistory.slice(-8),
-          {role:'user',content:msg}
-        ],temperature:0.5,max_tokens:800})});
-      const data=await r.json();const reply=data.choices?.[0]?.message?.content||'Sorry, I could not process that.';
-      removeTempMsg();addChatMsg('ai',reply);
-      S.chatHistory.push({role:'user',content:msg},{role:'assistant',content:reply});
-    }catch(e){removeTempMsg();addChatMsg('ai','AI request failed. Check your API key.')}
-  }else{
-    addChatMsg('ai','Set an OpenAI API key in the sidebar to enable AI chat. For now, try: "top 10 stocks", "score all", "push buys to trades", "approve all", "how many stocks", or "create strategy".');
-  }
-}
-
-function addChatMsg(role,content,temp=false){
-  const div=document.getElementById('chat-messages');
-  const el=document.createElement('div');el.className=`chat-msg ${role}`;if(temp)el.dataset.temp='1';
-  el.innerHTML=`<div class="avatar">${role==='user'?'You':'AI'}</div><div class="bubble">${content.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')}</div>`;
-  div.appendChild(el);div.scrollTop=div.scrollHeight;
-}
-function removeTempMsg(){document.querySelectorAll('[data-temp="1"]').forEach(el=>el.remove())}
-
-async function aiExplainRating(ticker){
-  const strat=getActiveStrategy();if(!strat)return;
-  const data=S.ratings[strat.id]||[];const r=data.find(x=>x.t===ticker.toUpperCase());
-  if(!r){addChatMsg('ai',`${ticker} not found in ratings.`);return}
-  const factorDetail=strat.factors.map(f=>{const cat=FACTOR_CATALOG.find(c=>c.id===f.id);return`${cat?.label||f.id}: ${r.factorScores[f.id]}/100 (weight ${f.weight}%)`}).join(', ');
-  const explanation=`**${r.t} — ${r.n}** (${r.rating}, Score: ${r.composite})\n\nStrategy: ${strat.name}\nSector: ${r.s} | P/E: ${r.pe} | Div Yield: ${r.dy}%\n\nFactor breakdown: ${factorDetail}\n\nThe composite score of ${r.composite} puts this in the **${r.rating}** bucket (Strong Buy >=70, Buy >=58, Hold >30, Sell <=30).`;
-
-  if(S.keys.ai){
-    addChatMsg('ai','<span class="spinner"></span> Generating AI analysis...',true);
-    try{const res=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${S.keys.ai}`},
-      body:JSON.stringify({model:'gpt-4o-mini',messages:[{role:'user',content:`Explain in 3-4 sentences why ${r.t} (${r.n}) is rated "${r.rating}" with composite score ${r.composite}. Factor scores: ${factorDetail}. P/E: ${r.pe}, Div Yield: ${r.dy}%, Market Cap: $${r.mc}B. Be specific about what's driving the rating up or down.`}],temperature:0.5,max_tokens:300})});
-      const d=await res.json();removeTempMsg();addChatMsg('ai',explanation+'\n\n**AI Analysis:** '+d.choices?.[0]?.message?.content);
-    }catch{removeTempMsg();addChatMsg('ai',explanation)}
-  }else{addChatMsg('ai',explanation)}
-
-  // Expand chat if collapsed
-  const pane=document.getElementById('chat-pane');if(pane.classList.contains('collapsed'))toggleChat();
-}
-
-// ═══════════════════════════════════════════
-//  MODAL
-// ═══════════════════════════════════════════
-let _modalOkFn=null;
-function showModal(title,bodyHtml,onOk){
-  _modalOkFn=onOk;
-  document.getElementById('modal-root').innerHTML=`<div class="modal-overlay" onclick="if(event.target===this)closeModal()"><div class="modal"><div class="modal-header"><h3>${title}</h3><button class="btn-icon" onclick="closeModal()">x</button></div><div class="modal-body">${bodyHtml}</div><div class="modal-footer"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="_modalOkFn&&_modalOkFn()">Save</button></div></div></div>`;
-}
-function closeModal(){document.getElementById('modal-root').innerHTML=''}
-
-// ═══════════════════════════════════════════
-//  CSV EXPORT
-// ═══════════════════════════════════════════
-function exportCSV(type){
-  let rows=[],headers=[];
-  if(type==='universe'){headers=['Ticker','Name','Sector','MarketCap_B','PE','DivYield','Price'];rows=S.universe.map(s=>[s.t,s.n,s.s,s.mc,s.pe,s.dy,s.p])}
-  else if(type==='ratings'){const data=S.ratings[S.activeStrategy]||[];headers=['Rank','Ticker','Name','Sector','Composite','Rating'];rows=data.map(r=>[r.rank,r.t,r.n,r.s,r.composite,r.rating])}
-  else if(type==='signals'){headers=['Date','Ticker','Type','Analyst','From','To','PT'];rows=S.signals.map(s=>[s.date,s.ticker,s.type,s.analyst,s.from,s.to,s.pt||''])}
-  else if(type==='trades'){headers=['Date','Ticker','Strategy','Side','Score','Status','Rationale'];rows=S.trades.map(t=>[t.date,t.ticker,t.strategyName,t.side,t.score,t.status,t.rationale])}
-  else if(type==='pm'){headers=['Date','Ticker','Side','Score','Rationale'];rows=S.trades.filter(t=>t.status==='pending').map(t=>[t.date,t.ticker,t.side,t.score,t.rationale])}
-  else if(type==='etf'){const etf=getActiveETF();if(!etf)return;headers=['Ticker','Name','Sector','Weight'];rows=etf.holdings.map(h=>[h.ticker,h.name,h.sector,h.weight])}
-  const csv=[headers.join(','),...rows.map(r=>r.map(c=>typeof c==='string'&&c.includes(',')?`"${c}"`:c).join(','))].join('\n');
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=`msim-${type}-${today()}.csv`;a.click();
-  toast(`Exported ${rows.length} rows`,'success');
-}
-
-// ═══════════════════════════════════════════
-//  INIT
-// ═══════════════════════════════════════════
-function init(){
-  initUniverse();initSignals();createDefaultStrategies();
-  runAutoScore();renderStrategies();renderUniverse();renderThesisTemplates();
-  toast('Platform loaded with demo data','success');
-}
-init();
+// ═══════ INIT ═══════
+initU();initSig();renderDash();renderTheses();genAISuggestions();toast('Platform ready','success');
 </script>
 </body>
 </html>
