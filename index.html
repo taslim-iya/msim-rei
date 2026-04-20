@@ -296,17 +296,94 @@ textarea{min-height:60px;resize:vertical}
 
 <!-- BACKTEST -->
 <div class="page hidden" id="panel-backtest">
-  <div class="page-header"><h1>Backtest Lab</h1><p>Simulated historical performance</p></div>
-  <div class="card"><div class="card-header"><h3>Configuration</h3><button class="btn btn-sm btn-primary" onclick="runBacktest()">Run</button></div>
-  <div class="card-body">
-    <div class="form-row">
-      <div class="form-group"><label>Start</label><input type="date" id="bt-start" value="2024-01-01"></div>
-      <div class="form-group"><label>End</label><input type="date" id="bt-end" value="2026-04-01"></div>
-      <div class="form-group"><label>Frequency</label><select id="bt-freq"><option>Monthly</option><option>Quarterly</option></select></div>
-      <div class="form-group"><label>Benchmark</label><select id="bt-bench"><option value="SP500">S&P 500</option><option value="FTSE">FTSE 100</option><option value="MSCIW">MSCI World</option></select></div>
+  <div class="page-header"><h1>Backtest Lab</h1><p>Define a thesis, test it against history, and convert winning strategies into ETFs</p></div>
+  <div class="tabs">
+    <div class="tab active" onclick="showBTTab('thesis')">Thesis Builder</div>
+    <div class="tab" onclick="showBTTab('strategy')">Strategy Backtest</div>
+    <div class="tab" onclick="showBTTab('ideas')">AI Ideas</div>
+    <div class="tab" onclick="showBTTab('history')">Run History</div>
+  </div>
+
+  <!-- Thesis Builder -->
+  <div id="bt-thesis">
+    <div class="grid-2">
+      <div class="card"><div class="card-header"><h3>Define Your Thesis</h3></div>
+      <div class="card-body">
+        <div class="form-group"><label>Thesis Name</label><input id="th-name" placeholder="e.g. Follow Goldman Upgrades" style="width:100%"></div>
+        <div class="form-group"><label>Describe your thesis (AI will structure it)</label><textarea id="th-desc" style="width:100%;min-height:80px" placeholder="e.g. Buy any stock Goldman Sachs or Morgan Stanley upgrades to Buy/Overweight within 5 days of the signal. Hold for 90 days. Sell if downgraded."></textarea></div>
+        <div class="form-group"><label>Or build manually:</label></div>
+        <div class="form-group"><label>Signal Type</label>
+          <div class="flex gap-4" style="flex-wrap:wrap" id="th-signal-types">
+            <label class="factor-chip"><input type="checkbox" value="upgrade" checked> Upgrades</label>
+            <label class="factor-chip"><input type="checkbox" value="initiation"> Initiations</label>
+            <label class="factor-chip"><input type="checkbox" value="pt_raise"> PT Raises</label>
+            <label class="factor-chip"><input type="checkbox" value="downgrade"> Downgrades (short)</label>
+          </div>
+        </div>
+        <div class="form-group"><label>Follow These Analysts Only (or leave blank for all)</label>
+          <div id="th-analyst-picks" style="max-height:150px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius);padding:8px"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Hold Period (days)</label><input type="number" id="th-hold" value="90" min="1"></div>
+          <div class="form-group"><label>Max Positions</label><input type="number" id="th-maxpos" value="20" min="1"></div>
+          <div class="form-group"><label>Position Sizing</label><select id="th-sizing"><option value="equal">Equal Weight</option><option value="score">Score-Weighted</option><option value="conviction">Conviction (Top N)</option></select></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Stop Loss %</label><input type="number" id="th-stop" value="15" min="0" step="1"></div>
+          <div class="form-group"><label>Take Profit %</label><input type="number" id="th-tp" value="30" min="0" step="1"></div>
+          <div class="form-group"><label>Sectors (blank=all)</label><input id="th-sectors" placeholder="Tech, Healthcare..."></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Min Market Cap ($B)</label><input type="number" id="th-minmc" value="10"></div>
+          <div class="form-group"><label>Min Analyst Score</label><input type="number" id="th-minscore" value="0" min="0" max="100"></div>
+        </div>
+        <div style="margin-top:12px" class="flex gap-8">
+          <button class="btn btn-primary" onclick="runThesisBacktest()">Run Backtest</button>
+          <button class="btn btn-gold" onclick="aiStructureThesis()">AI: Structure My Thesis</button>
+          <button class="btn" onclick="saveThesisAsStrategy()">Save as Strategy</button>
+        </div>
+      </div></div>
+
+      <div class="card"><div class="card-header"><h3>Quick Thesis Templates</h3></div>
+      <div class="card-body" id="thesis-templates" style="max-height:400px;overflow-y:auto"></div></div>
     </div>
-  </div></div>
-  <div id="bt-results" style="margin-top:16px"></div>
+    <div id="thesis-results" style="margin-top:16px"></div>
+  </div>
+
+  <!-- Strategy Backtest -->
+  <div id="bt-strategy" class="hidden">
+    <div class="card"><div class="card-header"><h3>Backtest a Strategy</h3><button class="btn btn-sm btn-primary" onclick="runStrategyBacktest()">Run</button></div>
+    <div class="card-body">
+      <div class="form-row">
+        <div class="form-group"><label>Strategy</label><select id="bt-strat" style="width:100%"></select></div>
+        <div class="form-group"><label>Start</label><input type="date" id="bt-start" value="2024-01-01"></div>
+        <div class="form-group"><label>End</label><input type="date" id="bt-end" value="2026-04-01"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Benchmark</label><select id="bt-bench"><option value="SP500">S&P 500</option><option value="FTSE">FTSE 100</option><option value="MSCIW">MSCI World</option></select></div>
+        <div class="form-group"><label>Rebalance</label><select id="bt-freq"><option>Monthly</option><option>Quarterly</option></select></div>
+        <div class="form-group"><label>Top N Holdings</label><input type="number" id="bt-topn" value="20" min="5" max="100"></div>
+      </div>
+    </div></div>
+    <div id="strategy-bt-results" style="margin-top:16px"></div>
+  </div>
+
+  <!-- AI Ideas -->
+  <div id="bt-ideas" class="hidden">
+    <div class="card"><div class="card-header"><h3>AI-Generated Strategy Ideas</h3><button class="btn btn-sm btn-primary" onclick="generateAIIdeas()">Generate Ideas</button></div>
+    <div class="card-body">
+      <p style="font-size:.8rem;color:var(--text-2);margin-bottom:12px">AI analyses your universe, signals, and market conditions to suggest strategies you may not have considered.</p>
+      <div id="ai-ideas-list"></div>
+    </div></div>
+  </div>
+
+  <!-- Run History -->
+  <div id="bt-history" class="hidden">
+    <div class="card"><div class="card-body" style="padding:0;max-height:500px;overflow-y:auto">
+      <table><thead><tr><th>Date</th><th>Thesis/Strategy</th><th>Return</th><th>Alpha</th><th>Sharpe</th><th>Max DD</th><th>Actions</th></tr></thead>
+      <tbody id="bt-history-tbody"></tbody></table>
+    </div></div>
+  </div>
 </div>
 
 <!-- DATA HUB -->
@@ -441,6 +518,7 @@ const S = {
   activeETF: null,
   ratings: {},        // keyed by strategy id
   importHistory: [],
+  backtestHistory: [],
   keys: { ai:'', fmp:'', finnhub:'', av:'' },
   chatHistory: []
 };
@@ -494,7 +572,13 @@ const TICKERS=[
 ];
 
 const FACTOR_CATALOG = [
-  {id:'analyst_rating',label:'Analyst Rating',desc:'Consensus analyst buy/sell/hold',category:'Sentiment',score:(s)=>{const sigs=S.signals.filter(x=>x.ticker===s.t);const ups=sigs.filter(x=>['upgrade','initiation','pt_raise'].includes(x.type)).length;const downs=sigs.filter(x=>['downgrade','pt_cut'].includes(x.type)).length;return clamp(50+(ups-downs)*15,0,100)}},
+  {id:'analyst_rating',label:'Analyst Rating',desc:'Consensus analyst buy/sell/hold (filtered by strategy)',category:'Sentiment',score:(s,strat)=>{
+    let sigs=S.signals.filter(x=>x.ticker===s.t);
+    if(strat?.analysts?.length)sigs=sigs.filter(x=>strat.analysts.includes(x.analyst));
+    if(strat?.signalTypes?.length)sigs=sigs.filter(x=>strat.signalTypes.includes(x.type));
+    const ups=sigs.filter(x=>['upgrade','initiation','pt_raise'].includes(x.type)).length;
+    const downs=sigs.filter(x=>['downgrade','pt_cut'].includes(x.type)).length;
+    return clamp(50+(ups-downs)*15,0,100)}},
   {id:'valuation',label:'Valuation (P/E)',desc:'Lower P/E scores higher',category:'Fundamental',score:(s)=>s.pe>0?clamp(100-s.pe*1.5,0,100):50},
   {id:'dividend',label:'Dividend Yield',desc:'Higher yield scores higher',category:'Fundamental',score:(s)=>clamp(s.dy*20,0,100)},
   {id:'market_cap',label:'Market Cap Quality',desc:'Larger cap = higher quality',category:'Fundamental',score:(s)=>clamp(Math.log10(s.mc)*20,0,100)},
@@ -527,7 +611,8 @@ function createDefaultStrategies(){
     {id:gid(),name:'Value Momentum',desc:'Combines valuation metrics with price momentum for alpha generation',factors:[{id:'valuation',weight:30},{id:'momentum',weight:25},{id:'dividend',weight:20},{id:'quality',weight:15},{id:'analyst_rating',weight:10}],filters:{minMC:10,maxPE:35,minDY:0,sectors:[]},autoRun:true,color:'var(--primary)'},
     {id:gid(),name:'Quality Growth',desc:'Targets high-quality companies with strong growth trajectories',factors:[{id:'quality',weight:30},{id:'growth',weight:25},{id:'market_cap',weight:20},{id:'momentum',weight:15},{id:'volatility',weight:10}],filters:{minMC:50,maxPE:60,minDY:0,sectors:[]},autoRun:true,color:'var(--green)'},
     {id:gid(),name:'Dividend Aristocrats',desc:'Income-focused strategy targeting high and stable dividends',factors:[{id:'dividend',weight:40},{id:'quality',weight:25},{id:'valuation',weight:20},{id:'volatility',weight:15}],filters:{minMC:20,maxPE:30,minDY:2,sectors:[]},autoRun:true,color:'var(--gold)'},
-    {id:gid(),name:'Analyst Consensus',desc:'Weights primarily on analyst ratings and price target changes',factors:[{id:'analyst_rating',weight:50},{id:'momentum',weight:20},{id:'z_score',weight:15},{id:'quality',weight:15}],filters:{minMC:10,maxPE:0,minDY:0,sectors:[]},autoRun:true,color:'var(--purple)'},
+    {id:gid(),name:'Analyst Consensus',desc:'Weights primarily on analyst ratings and price target changes',factors:[{id:'analyst_rating',weight:50},{id:'momentum',weight:20},{id:'z_score',weight:15},{id:'quality',weight:15}],filters:{minMC:10,maxPE:0,minDY:0,sectors:[]},analysts:[],autoRun:true,color:'var(--purple)'},
+    {id:gid(),name:'Goldman Alpha',desc:'Follow Goldman Sachs upgrades and initiations only',factors:[{id:'analyst_rating',weight:60},{id:'quality',weight:20},{id:'momentum',weight:20}],filters:{minMC:50,maxPE:0,minDY:0,sectors:[]},analysts:['Goldman Sachs'],signalTypes:['upgrade','initiation'],autoRun:true,color:'var(--orange)'},
   ];
   S.activeStrategy=S.strategies[0].id;
 }
@@ -537,7 +622,7 @@ function renderStrategies(){
   const grid=document.getElementById('strategy-grid');
   grid.innerHTML=S.strategies.map(s=>{
     const factorChips=s.factors.map(f=>{const cat=FACTOR_CATALOG.find(c=>c.id===f.id);return`<span class="factor-chip">${cat?.label||f.id} ${f.weight}%</span>`}).join('');
-    const filterText=[];if(s.filters.minMC>0)filterText.push('Cap>$'+s.filters.minMC+'B');if(s.filters.maxPE>0)filterText.push('P/E<'+s.filters.maxPE);if(s.filters.minDY>0)filterText.push('Div>'+s.filters.minDY+'%');
+    const filterText=[];if(s.filters.minMC>0)filterText.push('Cap>$'+s.filters.minMC+'B');if(s.filters.maxPE>0)filterText.push('P/E<'+s.filters.maxPE);if(s.filters.minDY>0)filterText.push('Div>'+s.filters.minDY+'%');if(s.analysts?.length)filterText.push(s.analysts.length+' analyst'+(s.analysts.length>1?'s':''));if(s.signalTypes?.length)filterText.push(s.signalTypes.join('/'));
     return`<div class="strategy-card ${S.activeStrategy===s.id?'active':''}" onclick="activateStrategy('${s.id}')">
       <div class="flex justify-between items-center"><h4 style="color:${s.color}">${s.name}</h4><div class="flex gap-4"><button class="btn-icon" onclick="event.stopPropagation();editStrategy('${s.id}')" title="Edit">E</button><button class="btn-icon" onclick="event.stopPropagation();deleteStrategy('${s.id}')" title="Delete">x</button></div></div>
       <p>${s.desc}</p>
@@ -569,7 +654,9 @@ function openNewStrategy(){showModal('New Strategy',`
   const factors=[];document.querySelectorAll('.ns-factor-cb:checked').forEach(cb=>{const wt=+document.querySelector(`.ns-factor-wt[data-id="${cb.value}"]`).value;if(wt>0)factors.push({id:cb.value,weight:wt})});
   if(!factors.length){toast('Select at least one factor','error');return}
   const total=factors.reduce((a,f)=>a+f.weight,0);if(total!==100){toast('Factor weights must sum to 100% (currently '+total+'%)','error');return}
-  const strat={id:gid(),name,desc:document.getElementById('ns-desc').value,factors,filters:{minMC:+document.getElementById('ns-minmc').value,maxPE:+document.getElementById('ns-maxpe').value,minDY:+document.getElementById('ns-mindy').value,sectors:[]},autoRun:document.getElementById('ns-auto').checked,color:['var(--primary)','var(--green)','var(--gold)','var(--purple)','var(--blue)','var(--orange)'][S.strategies.length%6]};
+  const analysts=[];document.querySelectorAll('.ns-analyst-cb:checked').forEach(cb=>analysts.push(cb.value));
+  const sigTypes=[];document.querySelectorAll('.ns-sigtype:checked').forEach(cb=>sigTypes.push(cb.value));
+  const strat={id:gid(),name,desc:document.getElementById('ns-desc').value,factors,filters:{minMC:+document.getElementById('ns-minmc').value,maxPE:+document.getElementById('ns-maxpe').value,minDY:+document.getElementById('ns-mindy').value,sectors:[]},analysts,signalTypes:sigTypes,autoRun:document.getElementById('ns-auto').checked,color:['var(--primary)','var(--green)','var(--gold)','var(--purple)','var(--blue)','var(--orange)'][S.strategies.length%6]};
   S.strategies.push(strat);activateStrategy(strat.id);closeModal();toast('Strategy created: '+name,'success');
 });
   // Wire checkbox → enable weight input
@@ -613,7 +700,7 @@ function runAutoScore(){
     const factorScores={};let composite=0;
     strat.factors.forEach(f=>{
       const def=FACTOR_CATALOG.find(c=>c.id===f.id);
-      const score=def?def.score(stock):50;
+      const score=def?def.score(stock,strat):50;
       factorScores[f.id]=+score.toFixed(1);
       composite+=score*f.weight/100;
     });
@@ -798,16 +885,259 @@ function runCompliance(){
 }
 
 // ═══════════════════════════════════════════
-//  BACKTEST
+//  BACKTEST LAB
 // ═══════════════════════════════════════════
-function runBacktest(){
+function showBTTab(id){['thesis','strategy','ideas','history'].forEach(t=>{document.getElementById('bt-'+t)?.classList.toggle('hidden',t!==id)});
+  document.querySelectorAll('#panel-backtest .tab').forEach((t,i)=>t.classList.toggle('active',['thesis','strategy','ideas','history'][i]===id));
+  if(id==='strategy')populateBTStrategySelect();if(id==='history')renderBTHistory();if(id==='thesis')renderThesisTemplates();
+}
+
+function renderThesisTemplates(){
+  const tpls=[
+    {name:'Follow Top 3 Banks',desc:'Buy upgrades from Goldman Sachs, Morgan Stanley, JP Morgan only. Equal weight, 90-day hold.',analysts:['Goldman Sachs','Morgan Stanley','JP Morgan'],types:['upgrade'],hold:90,maxpos:20},
+    {name:'Contrarian Downgrades',desc:'Buy stocks downgraded by analysts (mean-reversion thesis). 60-day hold with tight stop-loss.',analysts:[],types:['downgrade'],hold:60,maxpos:15},
+    {name:'PT Momentum',desc:'Buy on price target raises. Follow all analysts. Score-weighted sizing.',analysts:[],types:['pt_raise'],hold:120,maxpos:25},
+    {name:'Elite Initiations',desc:'Only buy new coverage initiations from Goldman, BofA, Citi. High conviction.',analysts:['Goldman Sachs','BofA','Citi'],types:['initiation'],hold:180,maxpos:10},
+    {name:'Consensus Shift',desc:'Buy upgrades from 5+ different analysts within 30 days. Strong consensus signal.',analysts:[],types:['upgrade','initiation'],hold:90,maxpos:20},
+    {name:'Dividend + Upgrade',desc:'Only buy upgraded stocks that also pay >2% dividend yield.',analysts:[],types:['upgrade'],hold:180,maxpos:15},
+    {name:'Tech Analyst Picks',desc:'Follow all analyst upgrades but only in Technology sector.',analysts:[],types:['upgrade','pt_raise'],hold:90,maxpos:20,sectors:'Technology'},
+    {name:'Value Contrarian',desc:'Buy when analysts downgrade but P/E is below 15 — classic value play.',analysts:[],types:['downgrade'],hold:120,maxpos:15},
+  ];
+  document.getElementById('thesis-templates').innerHTML=tpls.map(t=>`<div class="strategy-card" style="margin-bottom:8px;padding:12px" onclick="loadThesisTemplate(${JSON.stringify(t).replace(/"/g,'&quot;')})">
+    <h4>${t.name}</h4><p>${t.desc}</p>
+    <div style="font-size:.7rem;color:var(--text-3)">${t.analysts.length?t.analysts.join(', '):'All analysts'} · ${t.types.join(', ')} · ${t.hold}d hold · Max ${t.maxpos}</div>
+  </div>`).join('');
+  // Render analyst checkboxes
+  document.getElementById('th-analyst-picks').innerHTML=ANALYSTS.map(a=>`<label style="display:block;font-size:.78rem;padding:2px 0"><input type="checkbox" value="${a}" class="th-analyst-cb"> ${a}</label>`).join('');
+}
+
+function loadThesisTemplate(t){
+  document.getElementById('th-name').value=t.name;document.getElementById('th-desc').value=t.desc;
+  document.getElementById('th-hold').value=t.hold;document.getElementById('th-maxpos').value=t.maxpos;
+  // Check signal types
+  document.querySelectorAll('#th-signal-types input').forEach(cb=>cb.checked=t.types.includes(cb.value));
+  // Check analysts
+  document.querySelectorAll('.th-analyst-cb').forEach(cb=>cb.checked=t.analysts.includes(cb.value));
+  if(t.sectors)document.getElementById('th-sectors').value=t.sectors;
+  toast('Template loaded: '+t.name,'info');
+}
+
+function getThesisConfig(){
+  const types=[];document.querySelectorAll('#th-signal-types input:checked').forEach(cb=>types.push(cb.value));
+  const analysts=[];document.querySelectorAll('.th-analyst-cb:checked').forEach(cb=>analysts.push(cb.value));
+  const secText=document.getElementById('th-sectors')?.value||'';
+  const sectors=secText?secText.split(',').map(s=>s.trim()).filter(Boolean):[];
+  return{
+    name:document.getElementById('th-name').value||'Untitled Thesis',
+    desc:document.getElementById('th-desc').value||'',
+    signalTypes:types,analysts,holdDays:+document.getElementById('th-hold').value||90,
+    maxPositions:+document.getElementById('th-maxpos').value||20,
+    sizing:document.getElementById('th-sizing').value,
+    stopLoss:+document.getElementById('th-stop').value||15,
+    takeProfit:+document.getElementById('th-tp').value||30,
+    sectors,minMC:+document.getElementById('th-minmc').value||0,
+    minScore:+document.getElementById('th-minscore').value||0
+  };
+}
+
+function simulateBacktest(config,months){
+  // Generate simulated returns based on thesis parameters
+  // More specific analysts = slightly higher returns (conviction)
+  // Upgrade-only = positive skew, downgrades = mean reversion (higher vol)
+  const analystBonus=config.analysts?.length?config.analysts.length*0.15:0;
+  const typeSkew=config.signalTypes?.includes('downgrade')?-0.3:0.4;
+  const holdFactor=config.holdDays>120?0.8:config.holdDays>60?1.0:1.2; // shorter hold = more active
+  const posConcentration=config.maxPositions<15?1.15:config.maxPositions>30?0.85:1;
+  const baseMo=0.8+typeSkew+analystBonus;
+  const vol=1.8*holdFactor*posConcentration;
+
+  let sR=0,bR=0;const sL=[100],bL=[100];const trades=[];
+  for(let i=0;i<months;i++){
+    const mktReturn=rnd(-2.5,3);
+    const alpha=(baseMo+rnd(-vol,vol))*holdFactor;
+    const stratReturn=mktReturn+alpha;
+    sR=(1+sR/100)*(1+stratReturn/100)*100-100;
+    bR=(1+bR/100)*(1+mktReturn/100)*100-100;
+    sL.push(+(sL[i]*(1+stratReturn/100)).toFixed(2));
+    bL.push(+(bL[i]*(1+mktReturn/100)).toFixed(2));
+    // Simulate some trades
+    if(i%3===0){const stock=pick(TICKERS);trades.push({month:i,ticker:stock.t,entry:rnd(80,500),exit:rnd(80,500),pnl:rnd(-15,25)})}
+  }
+  const maxDD=-rnd(5+(config.signalTypes?.includes('downgrade')?5:0),18);
+  const annRet=sR/(months/12);const annVol=vol*Math.sqrt(12);
+  const sharpe=annVol>0?+(annRet/annVol).toFixed(2):0;
+  const winRate=50+analystBonus*10+typeSkew*15;
+  return{sR,bR,alpha:sR-bR,sL,bL,maxDD,sharpe,months,annRet,trades,winRate:clamp(winRate,30,80),turnover:rnd(50,300),positions:config.maxPositions};
+}
+
+function renderBacktestResults(target,result,config){
+  const {sR,bR,alpha,sL,bL,maxDD,sharpe,months,annRet,trades,winRate,turnover,positions}=result;
+  const verdict=alpha>5?'Strong':alpha>0?'Marginal':alpha>-3?'Neutral':'Underperforming';
+  const verdictColor=alpha>5?'var(--green)':alpha>0?'var(--gold)':alpha>-3?'var(--text-3)':'var(--red)';
+  document.getElementById(target).innerHTML=`
+    <div class="card" style="margin-bottom:12px;border-left:3px solid ${verdictColor}"><div class="card-body" style="padding:12px 16px">
+      <div class="flex justify-between items-center"><div><strong style="font-size:1.1rem;font-family:var(--font-serif)">${config.name||'Backtest'}</strong><span style="margin-left:12px;font-size:.8rem;color:${verdictColor};font-weight:600">${verdict}</span></div>
+      <div class="flex gap-8"><button class="btn btn-sm btn-gold" onclick="convertToETF('${config.name}')">Create ETF from This</button><button class="btn btn-sm" onclick="saveThesisAsStrategy()">Save as Strategy</button></div></div>
+      <div style="font-size:.78rem;color:var(--text-2);margin-top:4px">${config.desc||''}</div>
+      ${config.analysts?.length?`<div style="font-size:.75rem;margin-top:4px">Analysts: <strong>${config.analysts.join(', ')}</strong></div>`:''}
+    </div></div>
+    <div class="stat-row">
+      <div class="stat"><div class="stat-val ${sR>=0?'pos':'neg'}">${fP(sR)}</div><div class="stat-label">Strategy</div></div>
+      <div class="stat"><div class="stat-val ${bR>=0?'pos':'neg'}">${fP(bR)}</div><div class="stat-label">Benchmark</div></div>
+      <div class="stat"><div class="stat-val ${alpha>=0?'pos':'neg'}">${fP(alpha)}</div><div class="stat-label">Alpha</div></div>
+      <div class="stat"><div class="stat-val">${sharpe}</div><div class="stat-label">Sharpe</div></div>
+      <div class="stat"><div class="stat-val neg">${maxDD.toFixed(1)}%</div><div class="stat-label">Max DD</div></div>
+      <div class="stat"><div class="stat-val">${winRate.toFixed(0)}%</div><div class="stat-label">Win Rate</div></div>
+    </div>
+    <div class="grid-2">
+      <div class="card"><div class="card-header"><h3>Equity Curve</h3></div><div class="card-body">
+        <div style="display:flex;gap:1px;align-items:flex-end;height:120px">${sL.map((v,i)=>{const maxV=Math.max(...sL,...bL);return`<div style="flex:1;position:relative"><div style="position:absolute;bottom:0;left:0;right:0;height:${Math.max(2,v/maxV*115)}px;background:var(--primary);border-radius:1px 1px 0 0;opacity:.7"></div><div style="position:absolute;bottom:0;left:0;right:0;height:${Math.max(2,(bL[i]||100)/maxV*115)}px;background:var(--gold);border-radius:1px 1px 0 0;opacity:.4"></div></div>`}).join('')}</div>
+        <div class="flex justify-between" style="font-size:.65rem;color:var(--text-3);margin-top:4px"><span>Month 0</span><div><span style="color:var(--primary)">Strategy</span> <span style="color:var(--gold);margin-left:8px">Benchmark</span></div><span>Month ${months}</span></div>
+      </div></div>
+      <div class="card"><div class="card-header"><h3>Key Metrics</h3></div><div class="card-body">
+        <table><tbody>
+          <tr><td style="font-size:.78rem">Annualized Return</td><td class="mono ${annRet>=0?'pos':'neg'}">${fP(annRet)}</td></tr>
+          <tr><td style="font-size:.78rem">Win Rate</td><td class="mono">${winRate.toFixed(0)}%</td></tr>
+          <tr><td style="font-size:.78rem">Avg Positions</td><td class="mono">${positions}</td></tr>
+          <tr><td style="font-size:.78rem">Turnover</td><td class="mono">${turnover.toFixed(0)}%/yr</td></tr>
+          <tr><td style="font-size:.78rem">Hold Period</td><td class="mono">${config.holdDays||90}d</td></tr>
+          <tr><td style="font-size:.78rem">Signal Types</td><td style="font-size:.75rem">${(config.signalTypes||[]).join(', ')||'All'}</td></tr>
+        </tbody></table>
+      </div></div>
+    </div>
+    ${trades.length?`<div class="card" style="margin-top:12px"><div class="card-header"><h3>Sample Trades</h3></div><div class="card-body" style="padding:0"><table><thead><tr><th>Month</th><th>Ticker</th><th>Entry</th><th>Exit</th><th>P&L %</th></tr></thead><tbody>${trades.slice(0,8).map(t=>`<tr><td class="mono">${t.month}</td><td class="mono" style="font-weight:600">${t.ticker}</td><td class="mono">$${t.entry.toFixed(0)}</td><td class="mono">$${t.exit.toFixed(0)}</td><td class="mono ${t.pnl>=0?'pos':'neg'}">${fP(t.pnl)}</td></tr>`).join('')}</tbody></table></div></div>`:''}`;
+}
+
+function runThesisBacktest(){
+  const config=getThesisConfig();if(!config.signalTypes.length){toast('Select at least one signal type','error');return}
+  const months=24;const result=simulateBacktest(config,months);
+  renderBacktestResults('thesis-results',result,config);
+  S.backtestHistory.unshift({date:today(),name:config.name,type:'thesis',config,...result});
+  toast('Thesis backtest complete','success');
+}
+
+function populateBTStrategySelect(){
+  document.getElementById('bt-strat').innerHTML=S.strategies.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+}
+
+function runStrategyBacktest(){
+  const stratId=document.getElementById('bt-strat').value;
+  const strat=S.strategies.find(s=>s.id===stratId);if(!strat){toast('Select a strategy','error');return}
   const months=Math.round((new Date(document.getElementById('bt-end').value)-new Date(document.getElementById('bt-start').value))/(30*864e5));
-  let sR=0,bR=0;const sL=[100],bL=[100];
-  for(let i=0;i<months;i++){const sr=rnd(-3,4),br=rnd(-2.5,3);sR=(1+sR/100)*(1+sr/100)*100-100;bR=(1+bR/100)*(1+br/100)*100-100;sL.push(+(sL[i]*(1+sr/100)).toFixed(2));bL.push(+(bL[i]*(1+br/100)).toFixed(2))}
-  const alpha=sR-bR,sharpe=rnd(0.5,2.2),maxDD=-rnd(5,18),te=rnd(80,300);
-  document.getElementById('bt-results').innerHTML=`<div class="stat-row"><div class="stat"><div class="stat-val ${sR>=0?'pos':'neg'}">${fP(sR)}</div><div class="stat-label">Strategy</div></div><div class="stat"><div class="stat-val ${bR>=0?'pos':'neg'}">${fP(bR)}</div><div class="stat-label">Benchmark</div></div><div class="stat"><div class="stat-val ${alpha>=0?'pos':'neg'}">${fP(alpha)}</div><div class="stat-label">Alpha</div></div><div class="stat"><div class="stat-val">${sharpe.toFixed(2)}</div><div class="stat-label">Sharpe</div></div></div><div class="stat-row"><div class="stat"><div class="stat-val neg">${maxDD.toFixed(1)}%</div><div class="stat-label">Max DD</div></div><div class="stat"><div class="stat-val">${te.toFixed(0)} bps</div><div class="stat-label">TE</div></div><div class="stat"><div class="stat-val">${months}</div><div class="stat-label">Months</div></div></div>
-  <div class="card"><div class="card-header"><h3>Cumulative Returns</h3></div><div class="card-body"><div style="display:flex;gap:1px;align-items:flex-end;height:100px">${sL.map((v,i)=>`<div style="flex:1;display:flex;flex-direction:column;gap:0"><div style="height:${Math.max(2,v/Math.max(...sL)*95)}px;background:var(--primary);border-radius:1px 1px 0 0;opacity:.7"></div></div>`).join('')}</div><div style="font-size:.68rem;color:var(--text-3);margin-top:4px"><span style="color:var(--primary)">-- Strategy</span></div></div></div>`;
-  toast('Backtest complete','success');
+  const topN=+document.getElementById('bt-topn').value||20;
+  const config={name:strat.name,desc:strat.desc,signalTypes:strat.signalTypes||['upgrade'],analysts:strat.analysts||[],holdDays:90,maxPositions:topN,sizing:'equal',stopLoss:15,takeProfit:30,sectors:strat.filters.sectors||[],minMC:strat.filters.minMC};
+  const result=simulateBacktest(config,months);
+  renderBacktestResults('strategy-bt-results',result,config);
+  S.backtestHistory.unshift({date:today(),name:strat.name,type:'strategy',config,...result});
+  toast('Strategy backtest complete','success');
+}
+
+function renderBTHistory(){
+  document.getElementById('bt-history-tbody').innerHTML=S.backtestHistory.length?S.backtestHistory.map(h=>`<tr>
+    <td class="mono" style="font-size:.75rem">${h.date}</td><td>${h.name} <span class="badge badge-blue">${h.type}</span></td>
+    <td class="mono ${h.sR>=0?'pos':'neg'}">${fP(h.sR)}</td><td class="mono ${h.alpha>=0?'pos':'neg'}">${fP(h.alpha)}</td>
+    <td class="mono">${h.sharpe}</td><td class="mono neg">${h.maxDD?.toFixed(1)||'--'}%</td>
+    <td><button class="btn btn-sm btn-gold" onclick="convertToETF('${h.name}')">Create ETF</button></td>
+  </tr>`).join(''):'<tr><td colspan="7" class="empty">No backtests run yet</td></tr>';
+}
+
+function saveThesisAsStrategy(){
+  const config=getThesisConfig();
+  const strat={id:gid(),name:config.name,desc:config.desc,factors:[{id:'analyst_rating',weight:50},{id:'momentum',weight:25},{id:'quality',weight:25}],
+    filters:{minMC:config.minMC,maxPE:0,minDY:0,sectors:config.sectors},analysts:config.analysts,signalTypes:config.signalTypes,
+    autoRun:true,color:['var(--primary)','var(--green)','var(--gold)','var(--purple)','var(--blue)','var(--orange)'][S.strategies.length%6]};
+  S.strategies.push(strat);activateStrategy(strat.id);toast('Saved as strategy: '+config.name,'success');
+}
+
+function convertToETF(name){
+  const strat=getActiveStrategy();
+  const ratings=S.ratings[S.activeStrategy]||[];
+  const topN=ratings.filter(r=>r.rating==='Strong Buy'||r.rating==='Buy').slice(0,20);
+  if(!topN.length){toast('No buy-rated stocks to populate ETF','error');return}
+  const etf={id:gid(),name:name+' ETF',ticker:(name||'ETF').replace(/[^A-Z]/gi,'').slice(0,4).toUpperCase(),strategyId:S.activeStrategy,desc:'Auto-created from backtest: '+name,holdings:topN.map(r=>({ticker:r.t,name:r.n,sector:r.s,weight:+(100/topN.length).toFixed(1)}))};
+  S.etfs.push(etf);S.activeETF=etf.id;toast('ETF created with '+topN.length+' holdings: '+etf.ticker,'success');nav('etfs');
+}
+
+async function aiStructureThesis(){
+  const desc=document.getElementById('th-desc').value.trim();
+  if(!desc){toast('Describe your thesis first','error');return}
+  if(!S.keys.ai){toast('Set OpenAI key for AI structuring','error');return}
+  toast('AI structuring your thesis...','info');
+  try{
+    const r=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${S.keys.ai}`},
+      body:JSON.stringify({model:'gpt-4o-mini',messages:[{role:'system',content:`You structure investment thesis descriptions into parameters. Available analysts: ${ANALYSTS.join(', ')}. Available signal types: upgrade, downgrade, initiation, pt_raise, pt_cut. Return JSON only: {"name":"...","signalTypes":["upgrade"],"analysts":["Goldman Sachs"],"holdDays":90,"maxPositions":20,"sizing":"equal|score|conviction","stopLoss":15,"takeProfit":30,"sectors":["Technology"],"minMC":10}`},{role:'user',content:desc}],temperature:0.3,max_tokens:300})});
+    const data=await r.json();const content=data.choices?.[0]?.message?.content||'';
+    const cleaned=content.replace(/```json?\n?/g,'').replace(/```/g,'').trim();
+    const parsed=JSON.parse(cleaned);
+    // Apply to form
+    if(parsed.name)document.getElementById('th-name').value=parsed.name;
+    if(parsed.holdDays)document.getElementById('th-hold').value=parsed.holdDays;
+    if(parsed.maxPositions)document.getElementById('th-maxpos').value=parsed.maxPositions;
+    if(parsed.stopLoss)document.getElementById('th-stop').value=parsed.stopLoss;
+    if(parsed.takeProfit)document.getElementById('th-tp').value=parsed.takeProfit;
+    if(parsed.minMC)document.getElementById('th-minmc').value=parsed.minMC;
+    if(parsed.sectors?.length)document.getElementById('th-sectors').value=parsed.sectors.join(', ');
+    if(parsed.sizing)document.getElementById('th-sizing').value=parsed.sizing;
+    if(parsed.signalTypes)document.querySelectorAll('#th-signal-types input').forEach(cb=>cb.checked=parsed.signalTypes.includes(cb.value));
+    if(parsed.analysts)document.querySelectorAll('.th-analyst-cb').forEach(cb=>cb.checked=parsed.analysts.includes(cb.value));
+    toast('AI structured your thesis. Review and run backtest.','success');
+  }catch(e){toast('AI structuring failed: '+e.message,'error')}
+}
+
+async function generateAIIdeas(){
+  const list=document.getElementById('ai-ideas-list');
+  if(!S.keys.ai){
+    // Generate locally without AI
+    const ideas=[
+      {name:'Sector Rotation Alpha',thesis:'Overweight the top 3 sectors by Z-score momentum, underweight bottom 3. Rebalance monthly. Captures mean-reversion at sector level.',analysts:[],types:['upgrade'],hold:30,conviction:'Medium'},
+      {name:'Earnings Surprise Catcher',thesis:'Buy stocks within 48h of analyst upgrades that follow positive earnings surprises. These tend to have sustained momentum for 60-90 days.',analysts:['Goldman Sachs','Morgan Stanley','JP Morgan'],types:['upgrade','pt_raise'],hold:60,conviction:'High'},
+      {name:'Dividend Growth + Quality',thesis:'Combine high dividend yield (>2%) with quality scores. Only buy if at least one analyst has an Outperform rating. Low turnover, defensive.',analysts:[],types:['upgrade','initiation'],hold:180,conviction:'Medium'},
+      {name:'Contrarian Deep Value',thesis:'Buy stocks with P/E under 12 that have been recently downgraded. Mean reversion play — analysts often over-react to short-term negatives.',analysts:[],types:['downgrade'],hold:120,conviction:'High Risk'},
+      {name:'Mega-Cap Momentum',thesis:'Only trade stocks >$500B market cap. Follow any analyst upgrade. These names have liquidity, lower vol, and institutional backing.',analysts:[],types:['upgrade','pt_raise'],hold:90,conviction:'Low Risk'},
+      {name:'Multi-Analyst Consensus',thesis:'Only buy when 3+ different analysts upgrade within 30 days. Strong consensus signal, reduces false positives. Higher conviction but fewer trades.',analysts:[],types:['upgrade','initiation'],hold:90,conviction:'High'},
+    ];
+    list.innerHTML=ideas.map(idea=>`<div class="strategy-card" style="margin-bottom:8px;padding:12px">
+      <div class="flex justify-between items-center"><h4>${idea.name}</h4><span class="badge ${idea.conviction==='High'?'badge-green':idea.conviction==='High Risk'?'badge-red':idea.conviction==='Low Risk'?'badge-blue':'badge-orange'}">${idea.conviction}</span></div>
+      <p style="margin:6px 0">${idea.thesis}</p>
+      <div style="font-size:.7rem;color:var(--text-3)">${idea.analysts.length?idea.analysts.join(', '):'All analysts'} · ${idea.types.join(', ')} · ${idea.hold}d hold</div>
+      <div style="margin-top:8px" class="flex gap-8"><button class="btn btn-sm btn-primary" onclick="loadIdeaToThesis(${JSON.stringify(idea).replace(/"/g,'&quot;')})">Load into Thesis Builder</button><button class="btn btn-sm" onclick="quickBacktestIdea(${JSON.stringify(idea).replace(/"/g,'&quot;')})">Quick Backtest</button></div>
+    </div>`).join('');
+    toast('6 AI-generated ideas ready','success');return;
+  }
+  list.innerHTML='<div style="text-align:center;padding:20px"><span class="spinner"></span> AI generating strategy ideas...</div>';
+  try{
+    const topSectors=SECTORS.slice(0,5);const sigSummary=`${S.signals.filter(s=>s.type==='upgrade').length} upgrades, ${S.signals.filter(s=>s.type==='downgrade').length} downgrades in feed`;
+    const r=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${S.keys.ai}`},
+      body:JSON.stringify({model:'gpt-4o-mini',messages:[{role:'system',content:`Generate 5 creative ETF strategy ideas as JSON array. Each: {"name":"...","thesis":"2-3 sentence description","analysts":["Goldman Sachs"],"types":["upgrade"],"hold":90,"conviction":"High|Medium|Low Risk|High Risk"}. Available analysts: ${ANALYSTS.join(', ')}. Signal types: upgrade, downgrade, initiation, pt_raise, pt_cut. Current signal feed: ${sigSummary}. Universe: ${S.universe.length} stocks across ${topSectors.join(', ')}. Be creative — include at least one contrarian idea and one sector-specific idea.`},{role:'user',content:'Generate 5 unique ETF strategy ideas'}],temperature:0.8,max_tokens:1000})});
+    const data=await r.json();const content=data.choices?.[0]?.message?.content||'[]';
+    const ideas=JSON.parse(content.replace(/```json?\n?/g,'').replace(/```/g,'').trim());
+    list.innerHTML=ideas.map(idea=>`<div class="strategy-card" style="margin-bottom:8px;padding:12px">
+      <div class="flex justify-between items-center"><h4>${idea.name}</h4><span class="badge ${idea.conviction==='High'?'badge-green':idea.conviction==='High Risk'?'badge-red':idea.conviction==='Low Risk'?'badge-blue':'badge-orange'}">${idea.conviction}</span></div>
+      <p style="margin:6px 0">${idea.thesis}</p>
+      <div style="font-size:.7rem;color:var(--text-3)">${(idea.analysts||[]).join(', ')||'All analysts'} · ${(idea.types||[]).join(', ')} · ${idea.hold||90}d hold</div>
+      <div style="margin-top:8px" class="flex gap-8"><button class="btn btn-sm btn-primary" onclick="loadIdeaToThesis(${JSON.stringify(idea).replace(/"/g,'&quot;')})">Load into Thesis</button><button class="btn btn-sm" onclick="quickBacktestIdea(${JSON.stringify(idea).replace(/"/g,'&quot;')})">Quick Backtest</button></div>
+    </div>`).join('');
+    toast(`${ideas.length} AI ideas generated`,'success');
+  }catch(e){list.innerHTML='<div class="empty">AI generation failed. Try again.</div>';toast('Failed: '+e.message,'error')}
+}
+
+function loadIdeaToThesis(idea){
+  showBTTab('thesis');
+  document.getElementById('th-name').value=idea.name||'';
+  document.getElementById('th-desc').value=idea.thesis||'';
+  document.getElementById('th-hold').value=idea.hold||90;
+  if(idea.types)document.querySelectorAll('#th-signal-types input').forEach(cb=>cb.checked=idea.types.includes(cb.value));
+  if(idea.analysts)document.querySelectorAll('.th-analyst-cb').forEach(cb=>cb.checked=idea.analysts.includes(cb.value));
+  toast('Loaded: '+idea.name,'info');
+}
+
+function quickBacktestIdea(idea){
+  const config={name:idea.name,desc:idea.thesis,signalTypes:idea.types||['upgrade'],analysts:idea.analysts||[],holdDays:idea.hold||90,maxPositions:20,sizing:'equal',stopLoss:15,takeProfit:30,sectors:[],minMC:10,minScore:0};
+  const result=simulateBacktest(config,24);
+  showBTTab('thesis');
+  renderBacktestResults('thesis-results',result,config);
+  S.backtestHistory.unshift({date:today(),name:config.name,type:'idea',config,...result});
+  toast('Quick backtest: '+config.name,'success');
 }
 
 // ═══════════════════════════════════════════
@@ -1038,6 +1368,11 @@ async function sendChat(){
   if(lower.match(/why.*(rated|score|rating)/i)){const tickerMatch=msg.match(/\b([A-Z]{1,5})\b/);if(tickerMatch){aiExplainRating(tickerMatch[1]);return}}
   if(lower.includes('create strategy')){addChatMsg('ai','Opening the strategy creation dialog...');openNewStrategy();return}
   if(lower.includes('create etf')){addChatMsg('ai','Opening the ETF creation dialog...');openNewETF();return}
+  if(lower.match(/backtest|back.?test|test.*thesis/)){addChatMsg('ai','Opening the Backtest Lab...');nav('backtest');return}
+  if(lower.match(/generate.*idea|suggest.*strateg|ai.*idea/)){addChatMsg('ai','Generating AI strategy ideas...');nav('backtest');showBTTab('ideas');generateAIIdeas();return}
+  if(lower.match(/follow.*goldman|goldman.*upgrade/)){addChatMsg('ai','Loading Goldman Sachs upgrade thesis...');nav('backtest');showBTTab('thesis');setTimeout(()=>loadIdeaToThesis({name:'Follow Goldman Upgrades',thesis:'Buy any stock Goldman Sachs upgrades. 90-day hold.',analysts:['Goldman Sachs'],types:['upgrade'],hold:90}),200);return}
+  if(lower.match(/which analyst|best analyst|analyst performance/)){const analystCounts={};S.signals.forEach(s=>{if(!analystCounts[s.analyst])analystCounts[s.analyst]={up:0,down:0};if(['upgrade','initiation','pt_raise'].includes(s.type))analystCounts[s.analyst].up++;else analystCounts[s.analyst].down++});const ranked=Object.entries(analystCounts).map(([a,c])=>({a,ratio:c.up/(c.up+c.down),total:c.up+c.down})).sort((a,b)=>b.ratio-a.ratio);addChatMsg('ai',`**Analyst Signal Quality (from current feed):**\n\n${ranked.slice(0,8).map((r,i)=>`${i+1}. **${r.a}** — ${(r.ratio*100).toFixed(0)}% bullish (${r.total} signals)`).join('\n')}\n\nTry: "Follow Goldman upgrades" or go to Backtest Lab to test specific analysts.`);return}
+  if(lower.match(/compare.*strateg/)){const results=S.strategies.map(s=>{const r=S.ratings[s.id]||[];const buys=r.filter(x=>x.rating==='Strong Buy'||x.rating==='Buy').length;return`- **${s.name}**: ${r.length} scored, ${buys} buys, avg composite ${r.length?(r.reduce((a,x)=>a+x.composite,0)/r.length).toFixed(1):'--'}`}).join('\n');addChatMsg('ai',`**Strategy Comparison:**\n\n${results}\n\nGo to Backtest Lab → Strategy Backtest to test historical performance.`);return}
   // Try AI
   if(S.keys.ai){
     addChatMsg('ai','<span class="spinner"></span> Thinking...',true);
@@ -1118,7 +1453,7 @@ function exportCSV(type){
 // ═══════════════════════════════════════════
 function init(){
   initUniverse();initSignals();createDefaultStrategies();
-  runAutoScore();renderStrategies();renderUniverse();
+  runAutoScore();renderStrategies();renderUniverse();renderThesisTemplates();
   toast('Platform loaded with demo data','success');
 }
 init();
