@@ -120,7 +120,7 @@ canvas{display:block;width:100%;border:1px solid var(--bdr);border-radius:var(--
   <div class="g2">
     <div class="card"><div class="ch"><h3>Recent Activity</h3></div><div class="cb" id="d-activity" style="max-height:300px;overflow-y:auto"><div class="empty">No activity yet. Start by creating a thesis.</div></div></div>
     <div class="card"><div class="ch"><h3>Quick Actions</h3></div><div class="cb">
-      <button class="btn btn-g w100" style="margin-bottom:10px;font-size:1rem;padding:12px" onclick="loadDemo()">Load Demo Data</button>
+      <button class="btn btn-g w100" style="margin-bottom:10px;font-size:1rem;padding:12px" onclick="nav('demo');runDemoWalkthrough()">Launch Interactive Demo</button>
       <button class="btn btn-p w100" style="margin-bottom:8px" onclick="nav('theses');openNewThesis()">Create New Thesis</button>
       <button class="btn w100" style="margin-bottom:8px" onclick="nav('prices')">Load Price Data</button>
       <button class="btn w100" style="margin-bottom:8px" onclick="nav('backtest')">Run Backtest</button>
@@ -345,6 +345,39 @@ canvas{display:block;width:100%;border:1px solid var(--bdr);border-radius:var(--
   </div>
 </div>
 
+<!-- DEMO WALKTHROUGH -->
+<div class="page hidden" id="panel-demo">
+  <div class="ph"><h1>Interactive Demo</h1><p>Watch the full ETF creation workflow in action</p></div>
+  <div style="display:flex;gap:16px;margin-bottom:20px">
+    <button class="btn btn-g" id="demo-play" onclick="runDemoWalkthrough()" style="padding:10px 24px;font-size:.95rem">▶ Start Demo</button>
+    <button class="btn" id="demo-skip" onclick="skipDemoStep()" style="display:none">Skip Step →</button>
+    <button class="btn btn-d" id="demo-exit" onclick="nav('dash')" style="display:none;margin-left:auto">Exit Demo</button>
+  </div>
+  <!-- Step indicator -->
+  <div class="step-ind" id="demo-steps" style="margin-bottom:24px">
+    <div class="step-dot" data-step="0">1. Price Data</div>
+    <div class="step-dot" data-step="1">2. Thesis</div>
+    <div class="step-dot" data-step="2">3. Signal Scan</div>
+    <div class="step-dot" data-step="3">4. Backtest</div>
+    <div class="step-dot" data-step="4">5. Build ETF</div>
+    <div class="step-dot" data-step="5">6. PM Review</div>
+  </div>
+  <!-- Demo content area -->
+  <div id="demo-content">
+    <div class="card"><div class="cb" style="text-align:center;padding:48px">
+      <h2 style="margin-bottom:8px">Ready to see ETF Builder in action?</h2>
+      <p style="color:var(--txt2);margin-bottom:24px">This demo walks through the complete workflow — from loading price data to submitting an ETF for PM review. Each step runs with real calculations.</p>
+      <button class="btn btn-g" onclick="runDemoWalkthrough()" style="padding:12px 32px;font-size:1rem">▶ Start the Demo</button>
+    </div></div>
+  </div>
+  <!-- Demo log -->
+  <div class="card" style="margin-top:16px"><div class="ch"><h3>Demo Log</h3></div>
+    <div class="cb" id="demo-log" style="max-height:250px;overflow-y:auto;font-size:.88rem">
+      <div style="color:var(--txt3);font-style:italic">Waiting to start...</div>
+    </div>
+  </div>
+</div>
+
 </div><!-- ms -->
 
 <!-- AI CHAT -->
@@ -410,7 +443,7 @@ function initSig(){
 }
 
 // ═══════ NAV ═══════
-const PANELS=['dash','theses','universe','backtest','etfs','review','audit','data','prices'];
+const PANELS=['dash','theses','universe','backtest','etfs','review','audit','data','prices','demo'];
 function nav(id){PANELS.forEach(p=>{document.getElementById('panel-'+p)?.classList.toggle('hidden',p!==id);document.getElementById('nav-'+p)?.classList.toggle('active',p===id)});
   if(id==='dash')renderDash();if(id==='universe'){renderU();renderS()}if(id==='theses')renderTheses();if(id==='backtest')initBTPage();if(id==='etfs')renderETF();if(id==='review')renderReview();if(id==='audit')renderAudit();if(id==='prices')renderPriceData();}
 
@@ -1123,118 +1156,228 @@ function openThesisFromChat(){togChat();document.getElementById('ci').value='cre
 let _mok;function showMod(t,b,ok){_mok=ok;document.getElementById('modal-root').innerHTML=`<div class="mo" onclick="if(event.target===this)closeMod()"><div class="md"><div class="mh"><h3>${t}</h3><button class="btn" onclick="closeMod()">x</button></div><div class="mb">${b}</div><div class="mf"><button class="btn" onclick="closeMod()">Cancel</button><button class="btn btn-p" onclick="_mok&&_mok()">Save</button></div></div></div>`}
 function closeMod(){document.getElementById('modal-root').innerHTML=''}
 
-// ═══════ DEMO ═══════
-function loadDemo(){
-  // Generate 2 years of fake daily prices for key tickers
+// ═══════ DEMO WALKTHROUGH ═══════
+let _demoStep=-1,_demoRunning=false;
+function dLog(msg,type='info'){const el=document.getElementById('demo-log');if(!el)return;
+  const c=type==='success'?'var(--grn)':type==='highlight'?'var(--pri)':'var(--txt2)';
+  el.innerHTML+=`<div style="padding:4px 0;border-bottom:1px solid var(--bdr);color:${c}"><span style="color:var(--txt3);font-size:.8rem;margin-right:8px">${new Date().toLocaleTimeString()}</span>${msg}</div>`;
+  el.scrollTop=el.scrollHeight}
+function dStep(n){_demoStep=n;document.querySelectorAll('#demo-steps .step-dot').forEach((el,i)=>{
+  el.classList.toggle('done',i<n);el.classList.toggle('current',i===n)})}
+function dContent(html){document.getElementById('demo-content').innerHTML=html}
+function skipDemoStep(){if(_demoRunning&&_demoStep<5)_demoStep=5}
+
+async function runDemoWalkthrough(){
+  if(_demoRunning)return;_demoRunning=true;
+  document.getElementById('demo-play').style.display='none';
+  document.getElementById('demo-skip').style.display='';
+  document.getElementById('demo-exit').style.display='';
+  document.getElementById('demo-log').innerHTML='';
+  const wait=ms=>new Promise(r=>setTimeout(r,ms));
+  const fP=n=>n>=0?`+${n.toFixed(1)}%`:`${n.toFixed(1)}%`;
+
+  // ── STEP 0: Generate Price Data ──
+  dStep(0);dLog('Step 1: Loading historical price data for 20 tickers...','highlight');
+  dContent('<div class="card"><div class="ch"><h3>Loading Price Data</h3></div><div class="cb"><div class="prog"><div class="prog-bar" id="demo-prog" style="width:0%"></div><div class="prog-txt" id="demo-prog-txt">0%</div></div><div id="demo-price-tbl" style="margin-top:12px"></div></div></div>');
   const demoTickers=['AAPL','MSFT','GOOGL','AMZN','NVDA','META','TSLA','JPM','V','JNJ','UNH','XOM','PG','GS','BLK','HD','MA','LLY','SPY','QQQ'];
   const bases={AAPL:175,MSFT:380,GOOGL:140,AMZN:180,NVDA:800,META:500,TSLA:250,JPM:195,V:280,JNJ:160,UNH:520,XOM:105,PG:165,GS:430,BLK:800,HD:370,MA:460,LLY:780,SPY:480,QQQ:410};
   const end=new Date();const start=new Date();start.setFullYear(start.getFullYear()-2);
-  demoTickers.forEach(tk=>{
-    if(D.prices[tk]&&D.prices[tk].length>200)return;
-    const rows=[];let price=bases[tk]||200;
-    for(let d=new Date(start);d<=end;d.setDate(d.getDate()+1)){
-      if(d.getDay()===0||d.getDay()===6)continue;
-      price=price*(1+(Math.random()-0.48)*0.025);price=Math.max(price*0.5,price);
-      rows.push({d:d.toISOString().split('T')[0],c:+price.toFixed(2)});
-    }
-    addPrices(tk,rows);
-  });
+  for(let ti=0;ti<demoTickers.length;ti++){
+    const tk=demoTickers[ti];
+    if(!D.prices[tk]||D.prices[tk].length<200){
+      const rows=[];let price=bases[tk]||200;
+      for(let d=new Date(start);d<=end;d.setDate(d.getDate()+1)){
+        if(d.getDay()===0||d.getDay()===6)continue;
+        price=price*(1+(Math.random()-0.48)*0.025);rows.push({d:d.toISOString().split('T')[0],c:+price.toFixed(2)})}
+      addPrices(tk,rows)}
+    const pct=Math.round((ti+1)/demoTickers.length*100);
+    document.getElementById('demo-prog').style.width=pct+'%';
+    document.getElementById('demo-prog-txt').textContent=`${tk} — ${pct}%`;
+    dLog(`Loaded ${D.prices[tk].length} days for <b>${tk}</b> ($${D.prices[tk][D.prices[tk].length-1]?.c})`);
+    await wait(150)}
+  dLog(`Price data complete: <b>${demoTickers.length} tickers</b>, ~${D.prices['AAPL'].length} trading days each`,'success');
+  await wait(800);
 
-  // Create demo theses
-  if(!D.theses.length){
-    D.theses.push({
-      id:gid(),name:'Goldman Sachs Momentum',status:'active',date:today(),
-      description:'Follow Goldman Sachs analyst upgrades and initiations on mega-cap tech',
-      analysts:['Goldman Sachs','Morgan Stanley'],signalTypes:['upgrade','initiation','pt_raise'],
-      sectors:['Technology'],minMC:100,maxPE:0,minDiv:0,maxBeta:0,topN:10,
-      weightMethod:'equal',rebalance:'monthly',benchmark:'SPY',btResult:null
-    });
-    D.theses.push({
-      id:gid(),name:'Value Contrarian Play',status:'active',date:today(),
-      description:'Buy when top analysts downgrade — contrarian mean reversion strategy on blue chips',
-      analysts:['JP Morgan','Citi','BofA'],signalTypes:['downgrade','pt_lower'],
-      sectors:[],minMC:50,maxPE:0,minDiv:0,maxBeta:0,topN:8,
-      weightMethod:'equal',rebalance:'quarterly',benchmark:'SPY',btResult:null
-    });
-    D.theses.push({
-      id:gid(),name:'Healthcare Alpha',status:'active',date:today(),
-      description:'Target healthcare sector on analyst upgrades — JNJ, UNH, LLY cluster',
-      analysts:['Goldman Sachs','UBS','Barclays'],signalTypes:['upgrade','initiation'],
-      sectors:['Healthcare'],minMC:0,maxPE:0,minDiv:0,maxBeta:0,topN:5,
-      weightMethod:'equal',rebalance:'monthly',benchmark:'SPY',btResult:null
-    });
-    log('thesis','Demo theses created','3 investment theses loaded','Demo');
-  }
+  // ── STEP 1: Create Thesis ──
+  dStep(1);dLog('Step 2: Creating investment thesis...','highlight');
+  const thId=gid();
+  D.theses=[{id:thId,name:'Goldman Sachs Mega-Cap Momentum',status:'active',date:today(),
+    description:'Follow Goldman Sachs and Morgan Stanley analyst upgrades and initiations on mega-cap technology stocks. Target top 8 holdings with equal weighting.',
+    analysts:['Goldman Sachs','Morgan Stanley'],signalTypes:['upgrade','initiation','pt_raise'],
+    sectors:['Technology','Communication Services'],minMC:100,maxPE:0,minDiv:0,maxBeta:0,topN:8,
+    weightMethod:'equal',rebalance:'monthly',benchmark:'SPY',btResult:null},
+  {id:gid(),name:'Value Contrarian Play',status:'active',date:today(),
+    description:'Buy on analyst downgrades — contrarian mean reversion on blue chips',
+    analysts:['JP Morgan','Citi','BofA'],signalTypes:['downgrade','pt_lower'],
+    sectors:[],minMC:50,maxPE:0,minDiv:0,maxBeta:0,topN:8,
+    weightMethod:'equal',rebalance:'quarterly',benchmark:'SPY',btResult:null}];
+  dContent(`<div class="card"><div class="ch"><h3>Investment Thesis Created</h3></div><div class="cb">
+    <div style="margin-bottom:16px"><h2 style="color:var(--pri)">Goldman Sachs Mega-Cap Momentum</h2>
+    <p style="color:var(--txt2);margin-top:6px">Follow Goldman Sachs and Morgan Stanley analyst upgrades and initiations on mega-cap technology stocks. Target top 8 holdings with equal weighting.</p></div>
+    <div class="g3"><div class="st"><div class="sv">GS, MS</div><div class="sl">Analysts</div></div>
+    <div class="st"><div class="sv">3</div><div class="sl">Signal Types</div></div>
+    <div class="st"><div class="sv">$100B+</div><div class="sl">Min Market Cap</div></div></div>
+    <table style="margin-top:16px"><tr><th>Parameter</th><th>Value</th></tr>
+    <tr><td>Signal Types</td><td><span class="badge bg">Upgrade</span> <span class="badge bb">Initiation</span> <span class="badge bo">PT Raise</span></td></tr>
+    <tr><td>Sectors</td><td>Technology, Communication Services</td></tr>
+    <tr><td>Weighting</td><td>Equal Weight</td></tr>
+    <tr><td>Rebalance</td><td>Monthly</td></tr>
+    <tr><td>Benchmark</td><td>SPY (S&P 500)</td></tr></table></div></div>`);
+  log('thesis','Thesis created','Goldman Sachs Mega-Cap Momentum','Demo');
+  dLog('Thesis created: <b>Goldman Sachs Mega-Cap Momentum</b>','success');
+  dLog('Also created: <b>Value Contrarian Play</b> (2 theses total)');
+  await wait(1500);
 
-  // Create a demo ETF from the first thesis
-  if(!D.etfs.length){
-    const th=D.theses[0];
-    const holdings=[
-      {ticker:'AAPL',weight:12.5,source:'signal',rationale:'GS upgrade to Buy'},
-      {ticker:'MSFT',weight:12.5,source:'signal',rationale:'GS PT raise to $450'},
-      {ticker:'GOOGL',weight:12.5,source:'signal',rationale:'MS initiation at Overweight'},
-      {ticker:'NVDA',weight:12.5,source:'signal',rationale:'GS upgrade to Conviction Buy'},
-      {ticker:'META',weight:12.5,source:'signal',rationale:'GS PT raise to $600'},
-      {ticker:'AMZN',weight:12.5,source:'signal',rationale:'MS upgrade to Buy'},
-      {ticker:'MA',weight:12.5,source:'manual',rationale:'Payments sector tailwind'},
-      {ticker:'LLY',weight:12.5,source:'manual',rationale:'Healthcare diversifier'}
-    ];
-    const etf={id:gid(),name:'GS Momentum ETF',thesisId:th.id,thesisName:th.name,status:'draft',date:today(),
-      holdings,benchmark:'SPY',rebalance:'monthly',step:4,notes:'Demo ETF — 8 holdings equal weight'};
-    D.etfs.push(etf);D.activeETF=etf.id;
-    log('etf','Demo ETF created','GS Momentum ETF with 8 holdings','Demo');
-  }
+  // ── STEP 2: Signal Scan ──
+  dStep(2);dLog('Step 3: Scanning analyst signals matching thesis criteria...','highlight');
+  const matchingSignals=D.signals.filter(s=>{
+    if(!['upgrade','initiation','pt_raise'].includes(s.type))return false;
+    if(!['Goldman Sachs','Morgan Stanley'].includes(s.analyst))return false;return true});
+  const sigHTML=matchingSignals.slice(0,12).map(s=>{
+    const tc=s.type==='upgrade'?'bg':s.type==='initiation'?'bb':'bo';
+    return`<tr><td class="mono">${s.ticker}</td><td>${s.analyst}</td><td><span class="badge ${tc}">${s.type}</span></td><td>${s.from||'-'} → ${s.to||'-'}</td><td class="mono">${s.pt?'$'+s.pt:'-'}</td><td>${s.date}</td></tr>`}).join('');
+  dContent(`<div class="card"><div class="ch"><h3>Signal Scan Results</h3><span class="badge bgl">${matchingSignals.length} matches</span></div><div class="cb">
+    <p style="margin-bottom:12px;color:var(--txt2)">Found <b>${matchingSignals.length}</b> signals matching thesis criteria (GS/MS upgrades, initiations, PT raises)</p>
+    <div style="overflow-x:auto"><table><thead><tr><th>Ticker</th><th>Analyst</th><th>Type</th><th>Rating Change</th><th>Price Target</th><th>Date</th></tr></thead>
+    <tbody>${sigHTML||'<tr><td colspan="6" class="empty">No matching signals in current data</td></tr>'}</tbody></table></div></div></div>`);
+  dLog(`Found <b>${matchingSignals.length}</b> matching signals from Goldman Sachs and Morgan Stanley`,'success');
+  const sigTickers=[...new Set(matchingSignals.map(s=>s.ticker))];
+  dLog(`Unique tickers with signals: ${sigTickers.slice(0,10).join(', ')}`);
+  await wait(1500);
 
-  // Run a quick backtest on the first thesis
-  const th=D.theses[0];
-  const tickers=['AAPL','MSFT','GOOGL','NVDA','META','AMZN','MA','LLY'];
-  const from=new Date();from.setFullYear(from.getFullYear()-1);
-  const fromStr=from.toISOString().split('T')[0];
-  const toStr=today();
-
-  // Get common dates
+  // ── STEP 3: Backtest ──
+  dStep(3);dLog('Step 4: Running full backtest — 1 year, equal weight, monthly rebalance...','highlight');
+  const btTickers=['AAPL','MSFT','GOOGL','NVDA','META','AMZN','MA','LLY'];
+  const fromD=new Date();fromD.setFullYear(fromD.getFullYear()-1);
+  const fromStr=fromD.toISOString().split('T')[0];const toStr=today();
   let dates=null;
-  tickers.forEach(tk=>{
-    const pd=D.prices[tk];if(!pd)return;
+  btTickers.forEach(tk=>{const pd=D.prices[tk];if(!pd)return;
     const ds=pd.filter(p=>p.d>=fromStr&&p.d<=toStr).map(p=>p.d);
-    if(!dates)dates=ds;else dates=dates.filter(d=>ds.includes(d));
-  });
+    if(!dates)dates=ds;else dates=dates.filter(d=>ds.includes(d))});
+  dContent(`<div class="card"><div class="ch"><h3>Running Backtest</h3></div><div class="cb">
+    <div class="prog"><div class="prog-bar" id="demo-bt-prog" style="width:0%"></div><div class="prog-txt" id="demo-bt-txt">Initialising...</div></div>
+    <div class="g2" style="margin-top:16px"><div class="st"><div class="sv" id="demo-bt-ret">--</div><div class="sl">Portfolio Return</div></div>
+    <div class="st"><div class="sv" id="demo-bt-alpha">--</div><div class="sl">Alpha vs SPY</div></div></div>
+    <canvas id="demo-bt-chart" height="200" style="margin-top:16px"></canvas>
+    <div id="demo-bt-stats" style="margin-top:16px"></div></div></div>`);
+  await wait(400);
   if(dates&&dates.length>50){
-    dates.sort();
-    const cap=100000;const wt=1/tickers.length;
-    let portVal=cap,benchVal=cap;
-    const portValues=[{d:dates[0],v:cap}];const benchValues=[{d:dates[0],v:cap}];
-    const priceOn=(tk,d)=>{const pd=D.prices[tk];if(!pd)return null;const r=pd.find(p=>p.d===d);return r?r.c:null};
-    const p0={};tickers.forEach(tk=>p0[tk]=priceOn(tk,dates[0]));
-    const bp0=priceOn('SPY',dates[0]);
-
+    dates.sort();const cap=100000;const wt=1/btTickers.length;
+    let pV=cap,bV=cap;const pVals=[{d:dates[0],v:cap}];const bVals=[{d:dates[0],v:cap}];
+    const prOn=(tk,d)=>{const pd=D.prices[tk];if(!pd)return null;const r=pd.find(p=>p.d===d);return r?r.c:null};
     for(let i=1;i<dates.length;i++){
-      let dayRet=0;
-      tickers.forEach(tk=>{const prev=priceOn(tk,dates[i-1]);const cur=priceOn(tk,dates[i]);if(prev&&cur)dayRet+=(cur/prev-1)*wt});
-      portVal*=(1+dayRet);portValues.push({d:dates[i],v:+portVal.toFixed(2)});
-      const bPrev=priceOn('SPY',dates[i-1]);const bCur=priceOn('SPY',dates[i]);
-      if(bPrev&&bCur)benchVal*=(bCur/bPrev);benchValues.push({d:dates[i],v:+benchVal.toFixed(2)});
-    }
-    const portRet=(portVal/cap-1)*100;const benchRet=(benchVal/cap-1)*100;
-    const dailyRet=[];for(let i=1;i<portValues.length;i++)dailyRet.push(portValues[i].v/portValues[i-1].v-1);
-    const avg=dailyRet.reduce((a,b)=>a+b,0)/dailyRet.length;
-    const std=Math.sqrt(dailyRet.reduce((a,b)=>a+(b-avg)**2,0)/dailyRet.length);
-    const sharpe=std>0?(avg/std)*Math.sqrt(252):0;
-    let peak=0,maxDD=0;portValues.forEach(p=>{if(p.v>peak)peak=p.v;const dd=(peak-p.v)/peak*100;if(dd>maxDD)maxDD=dd});
+      let dr=0;btTickers.forEach(tk=>{const prev=prOn(tk,dates[i-1]);const cur=prOn(tk,dates[i]);if(prev&&cur)dr+=(cur/prev-1)*wt});
+      pV*=(1+dr);pVals.push({d:dates[i],v:+pV.toFixed(2)});
+      const bp=prOn('SPY',dates[i-1]);const bc=prOn('SPY',dates[i]);if(bp&&bc)bV*=(bc/bp);bVals.push({d:dates[i],v:+bV.toFixed(2)});
+      if(i%25===0||i===dates.length-1){
+        const pct=Math.round(i/dates.length*100);
+        document.getElementById('demo-bt-prog').style.width=pct+'%';
+        document.getElementById('demo-bt-txt').textContent=`Day ${i}/${dates.length} — ${dates[i]}`;
+        const pr=((pV/cap-1)*100);const br=((bV/cap-1)*100);
+        document.getElementById('demo-bt-ret').textContent=fP(pr);document.getElementById('demo-bt-ret').className='sv '+(pr>=0?'pos':'neg');
+        document.getElementById('demo-bt-alpha').textContent=fP(pr-br);document.getElementById('demo-bt-alpha').className='sv '+((pr-br)>=0?'pos':'neg');
+        await wait(80)}}
+    const portRet=(pV/cap-1)*100;const benchRet=(bV/cap-1)*100;const alpha=portRet-benchRet;
+    const dailyRet=[];const bDailyRet=[];
+    for(let i=1;i<pVals.length;i++){dailyRet.push(pVals[i].v/pVals[i-1].v-1);bDailyRet.push(bVals[i].v/bVals[i-1].v-1)}
+    const avgR=dailyRet.reduce((a,b)=>a+b,0)/dailyRet.length;
+    const stdR=Math.sqrt(dailyRet.reduce((a,b)=>a+(b-avgR)**2,0)/dailyRet.length);
+    const sharpe=stdR>0?(avgR/stdR)*Math.sqrt(252):0;
+    const downR=dailyRet.filter(r=>r<0);const downDev=downR.length?Math.sqrt(downR.reduce((a,b)=>a+b**2,0)/downR.length):0;
+    const sortino=downDev>0?(avgR/downDev)*Math.sqrt(252):0;
+    const winRate=dailyRet.filter(r=>r>0).length/dailyRet.length*100;
+    let peak=0,maxDD=0;pVals.forEach(p=>{if(p.v>peak)peak=p.v;const dd=(peak-p.v)/peak*100;if(dd>maxDD)maxDD=dd});
+    // Draw equity curve
+    const cvs=document.getElementById('demo-bt-chart');if(cvs){
+      const ctx=cvs.getContext('2d');const W=cvs.offsetWidth;const H=200;cvs.width=W;cvs.height=H;
+      const allV=[...pVals.map(p=>p.v),...bVals.map(p=>p.v)];const mn=Math.min(...allV);const mx=Math.max(...allV);
+      const draw=(vals,color)=>{ctx.beginPath();vals.forEach((p,i)=>{const x=i/(vals.length-1)*W;const y=H-((p.v-mn)/(mx-mn)*(H-20)+10);i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.strokeStyle=color;ctx.lineWidth=2;ctx.stroke()};
+      ctx.fillStyle='var(--bg3)';ctx.fillRect(0,0,W,H);draw(pVals,'#B8860B');draw(bVals,'#8c8c8c');
+      ctx.font='12px DM Sans';ctx.fillStyle='#B8860B';ctx.fillText('Portfolio',10,16);ctx.fillStyle='#8c8c8c';ctx.fillText('SPY',90,16)}
+    // Show stats
+    document.getElementById('demo-bt-stats').innerHTML=`<div class="sr" style="flex-wrap:wrap">
+      <div class="st"><div class="sv ${portRet>=0?'pos':'neg'}">${fP(portRet)}</div><div class="sl">Total Return</div></div>
+      <div class="st"><div class="sv ${alpha>=0?'pos':'neg'}">${fP(alpha)}</div><div class="sl">Alpha</div></div>
+      <div class="st"><div class="sv">${sharpe.toFixed(2)}</div><div class="sl">Sharpe</div></div>
+      <div class="st"><div class="sv">${sortino.toFixed(2)}</div><div class="sl">Sortino</div></div>
+      <div class="st"><div class="sv neg">-${maxDD.toFixed(1)}%</div><div class="sl">Max Drawdown</div></div>
+      <div class="st"><div class="sv">${winRate.toFixed(0)}%</div><div class="sl">Win Rate</div></div></div>
+      <h3 style="margin:16px 0 8px">Individual Holdings</h3>
+      <table><thead><tr><th>Ticker</th><th>Weight</th><th>Return</th></tr></thead><tbody>
+      ${btTickers.map(tk=>{const p0=prOn(tk,dates[0]);const pE=prOn(tk,dates[dates.length-1]);const r=p0&&pE?((pE/p0-1)*100):0;
+        return`<tr><td class="mono" style="font-weight:700">${tk}</td><td>12.5%</td><td class="${r>=0?'pos':'neg'}">${fP(r)}</td></tr>`}).join('')}
+      </tbody></table>`;
+    // Save backtest result
+    const btResult={id:gid(),date:now(),from:fromStr,to:toStr,benchmark:'SPY',rebalance:'monthly',capital:cap,
+      holdings:btTickers.map(t=>({ticker:t,weight:12.5})),totalReturn:+portRet.toFixed(2),benchReturn:+benchRet.toFixed(2),
+      alpha:+alpha.toFixed(2),annReturn:+((Math.pow(pV/cap,252/dates.length)-1)*100).toFixed(2),
+      sharpe:+sharpe.toFixed(2),sortino:+sortino.toFixed(2),maxDD:+maxDD.toFixed(2),annVol:+(stdR*Math.sqrt(252)*100).toFixed(2),
+      winRate:+winRate.toFixed(1),trackingError:3.2,infoRatio:+(alpha/3.2).toFixed(2),
+      portValues:pVals,benchValues:bVals,monthly:[],holdPerf:btTickers.map(t=>{const p0=prOn(t,dates[0]);const pE=prOn(t,dates[dates.length-1]);return{ticker:t,ret:p0&&pE?+((pE/p0-1)*100).toFixed(2):0}}),days:dates.length};
+    D.backtests.push(btResult);D.theses[0].btResult=btResult;
+    log('backtest','Backtest complete',`Return ${portRet.toFixed(1)}%, Alpha ${alpha.toFixed(1)}%, Sharpe ${sharpe.toFixed(2)}`,'Demo');
+    dLog(`Backtest complete: <b>${fP(portRet)}</b> return, <b>${fP(alpha)}</b> alpha, Sharpe <b>${sharpe.toFixed(2)}</b>`,'success')}
+  else{dLog('Insufficient price data for backtest','error')}
+  await wait(2000);
 
-    const result={id:gid(),date:now(),from:fromStr,to:toStr,benchmark:'SPY',rebalance:'monthly',capital:cap,
-      holdings:tickers.map(t=>({ticker:t,weight:wt*100})),
-      totalReturn:+portRet.toFixed(2),benchReturn:+benchRet.toFixed(2),alpha:+(portRet-benchRet).toFixed(2),
-      annReturn:+((Math.pow(portVal/cap,252/dates.length)-1)*100).toFixed(2),
-      sharpe:+sharpe.toFixed(2),sortino:+(sharpe*1.15).toFixed(2),maxDD:+maxDD.toFixed(2),annVol:+(std*Math.sqrt(252)*100).toFixed(2),
-      winRate:+(dailyRet.filter(r=>r>0).length/dailyRet.length*100).toFixed(1),
-      trackingError:3.2,infoRatio:+((portRet-benchRet)/3.2).toFixed(2),
-      portValues,benchValues,monthly:[],holdPerf:tickers.map(t=>{const p0v=priceOn(t,dates[0]);const pEnd=priceOn(t,dates[dates.length-1]);return{ticker:t,ret:p0v&&pEnd?+((pEnd/p0v-1)*100).toFixed(2):0}}),days:dates.length};
-    D.backtests.push(result);th.btResult=result;
-    log('backtest','Demo backtest complete',`${tickers.length} holdings, ${fromStr} to ${toStr}: Return ${portRet.toFixed(1)}%, Sharpe ${sharpe.toFixed(2)}`,'Demo');
-  }
+  // ── STEP 4: Build ETF ──
+  dStep(4);dLog('Step 5: Building ETF from thesis holdings...','highlight');
+  const holdings=[
+    {ticker:'AAPL',weight:12.5,source:'signal',rationale:'GS upgrade to Conviction Buy'},
+    {ticker:'MSFT',weight:12.5,source:'signal',rationale:'GS PT raise to $480'},
+    {ticker:'GOOGL',weight:12.5,source:'signal',rationale:'MS initiation at Overweight'},
+    {ticker:'NVDA',weight:12.5,source:'signal',rationale:'GS upgrade — AI infrastructure thesis'},
+    {ticker:'META',weight:12.5,source:'signal',rationale:'MS PT raise — monetisation beat'},
+    {ticker:'AMZN',weight:12.5,source:'signal',rationale:'GS upgrade — AWS re-acceleration'},
+    {ticker:'MA',weight:12.5,source:'manual',rationale:'Payments sector tailwind'},
+    {ticker:'LLY',weight:12.5,source:'manual',rationale:'Healthcare diversifier — GLP-1 pipeline'}];
+  D.etfs=[{id:gid(),name:'GS Momentum Alpha ETF',thesisId:thId,thesisName:'Goldman Sachs Mega-Cap Momentum',
+    status:'submitted',date:today(),holdings,benchmark:'SPY',rebalance:'monthly',step:5,
+    notes:'8 holdings, equal weight, monthly rebalance. Driven by GS/MS analyst conviction signals.'}];
+  D.activeETF=D.etfs[0].id;
+  dContent(`<div class="card"><div class="ch"><h3>ETF Built: GS Momentum Alpha ETF</h3><span class="badge bgl">Submitted for Review</span></div><div class="cb">
+    <div class="g3" style="margin-bottom:16px"><div class="st"><div class="sv">8</div><div class="sl">Holdings</div></div>
+    <div class="st"><div class="sv">100%</div><div class="sl">Weight Sum</div></div>
+    <div class="st"><div class="sv badge bg">Pass</div><div class="sl">Compliance</div></div></div>
+    <table><thead><tr><th>Ticker</th><th>Weight</th><th>Source</th><th>Rationale</th></tr></thead><tbody>
+    ${holdings.map(h=>`<tr><td class="mono" style="font-weight:700">${h.ticker}</td><td>12.5%</td><td><span class="badge ${h.source==='signal'?'bb':'bo'}">${h.source}</span></td><td>${h.rationale}</td></tr>`).join('')}
+    </tbody></table></div></div>`);
+  log('etf','ETF created','GS Momentum Alpha ETF — 8 holdings equal weight','Demo');
+  dLog('ETF created: <b>GS Momentum Alpha ETF</b> — 8 holdings, equal weight','success');
+  dLog('Compliance check: <b class="pos">PASSED</b> — weight sum 100%, no position >15%');
+  await wait(1500);
 
-  renderDash();toast('Demo loaded — theses, ETF, price data, and backtest ready','success');
+  // ── STEP 5: PM Review ──
+  dStep(5);dLog('Step 6: Submitting to PM Review queue...','highlight');
+  D.etfs[0].status='submitted';
+  dContent(`<div class="card"><div class="ch"><h3>PM Review Queue</h3></div><div class="cb">
+    <div style="padding:20px;background:var(--goldL);border-radius:var(--r);margin-bottom:16px">
+      <h3 style="color:var(--pri);margin-bottom:4px">GS Momentum Alpha ETF</h3>
+      <p style="color:var(--txt2)">Submitted for portfolio manager review and approval</p></div>
+    <div class="g2"><div class="st"><div class="sv">8</div><div class="sl">Holdings</div></div>
+    <div class="st"><div class="sv badge bg">Compliant</div><div class="sl">Status</div></div></div>
+    <div style="margin-top:16px;padding:16px;border:2px solid var(--pri);border-radius:var(--r)">
+      <h3 style="margin-bottom:8px">Review Summary</h3>
+      <ul style="padding-left:20px;color:var(--txt2);line-height:1.8">
+        <li>Thesis: Goldman Sachs Mega-Cap Momentum</li>
+        <li>Holdings: AAPL, MSFT, GOOGL, NVDA, META, AMZN, MA, LLY</li>
+        <li>Weight method: Equal (12.5% each)</li>
+        <li>Rebalance: Monthly</li>
+        <li>Benchmark: SPY (S&P 500)</li>
+        <li>Compliance: All checks passed</li>
+      </ul>
+      <div style="margin-top:12px;display:flex;gap:10px">
+        <button class="btn btn-p" onclick="toast('ETF approved by PM','success');dLog('PM approved the ETF','success')">✓ Approve</button>
+        <button class="btn btn-d" onclick="toast('ETF rejected','error')">✗ Reject</button>
+        <button class="btn" onclick="toast('Sent back for revision','info')">↩ Revise</button>
+      </div>
+    </div></div></div>`);
+  log('review','ETF submitted for review','GS Momentum Alpha ETF','Demo');
+  dLog('ETF submitted to PM Review queue','success');
+  dLog('<b>Demo complete!</b> All data is saved — explore the full app using the sidebar navigation.','highlight');
+  document.getElementById('demo-skip').style.display='none';
+  _demoRunning=false;
+  renderDash()
 }
 
 // ═══════ INIT ═══════
