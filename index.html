@@ -98,9 +98,10 @@ canvas{display:block;width:100%;border:1px solid var(--bdr);border-radius:var(--
   </div>
   <div style="margin-top:auto;padding:12px 16px;border-top:1px solid var(--bdr)">
     <div class="fg"><label>OpenAI Key</label><input id="aiKey" type="password" placeholder="sk-..." style="width:100%;font-size:.72rem"></div>
-    <div class="fg"><label>FMP Key</label><input id="fmpKey" placeholder="FMP key" style="width:100%;font-size:.72rem"></div>
-    <div class="fg"><label>Finnhub Key</label><input id="fhKey" placeholder="Finnhub" style="width:100%;font-size:.72rem"></div>
+    <div class="fg"><label>FMP Key <a href="https://site.financialmodelingprep.com/register" target="_blank" style="color:var(--pri);font-size:.65rem;text-decoration:none">(Get free key)</a></label><input id="fmpKey" placeholder="FMP key" style="width:100%;font-size:.72rem"></div>
+    <div class="fg"><label>Finnhub Key <a href="https://finnhub.io/register" target="_blank" style="color:var(--pri);font-size:.65rem;text-decoration:none">(Get free key)</a></label><input id="fhKey" placeholder="Finnhub" style="width:100%;font-size:.72rem"></div>
     <button class="btn btn-s w100 btn-p" onclick="saveKeys()">Save Keys</button>
+    <div style="margin-top:6px;font-size:.65rem;color:var(--txt3);text-align:center">Keys saved in browser</div>
   </div>
 </div>
 
@@ -337,7 +338,7 @@ canvas{display:block;width:100%;border:1px solid var(--bdr);border-radius:var(--
       <tbody id="pd-tbody"></tbody></table>
     </div></div>
     <div style="margin-top:8px" class="flex g8">
-      <button class="btn btn-s btn-d" onclick="D.prices={};renderPriceData();toast('All price data cleared','info')">Clear All</button>
+      <button class="btn btn-s btn-d" onclick="D.prices={};savePrices();renderPriceData();toast('All price data cleared','info')">Clear All</button>
       <button class="btn btn-s" onclick="exportCSV('prices')">Export All</button>
     </div>
   </div>
@@ -432,10 +433,13 @@ function addPrices(ticker,rows){
   if(!D.prices[ticker])D.prices[ticker]=[];
   const existing=new Set(D.prices[ticker].map(r=>r.d));
   let added=0;
-  rows.forEach(r=>{if(r.d&&r.c&&!existing.has(r.d)){D.prices[ticker].push(r);existing.add(r.d);added++}});
+  rows.forEach(r=>{if(r.d&&r.c&&!existing.has(r.d)){D.prices[ticker].push({d:r.d,c:r.c});existing.add(r.d);added++}});
   D.prices[ticker].sort((a,b)=>a.d.localeCompare(b.d));
+  savePrices();
   return added;
 }
+function savePrices(){try{localStorage.setItem('etfb-prices',JSON.stringify(D.prices))}catch(e){/* storage full */}}
+function loadPrices(){try{const p=JSON.parse(localStorage.getItem('etfb-prices')||'{}');if(p&&typeof p==='object')D.prices=p}catch{}}
 
 function renderPriceData(){
   const tickers=Object.keys(D.prices).sort();
@@ -444,7 +448,7 @@ function renderPriceData(){
   document.getElementById('pd-tickers').textContent=tickers.length;
   document.getElementById('pd-points').textContent=totalPts.toLocaleString();
   document.getElementById('pd-range').textContent=minD&&maxD?minD+' to '+maxD:'--';
-  document.getElementById('pd-tbody').innerHTML=tickers.length?tickers.map(t=>{const d=D.prices[t];return`<tr><td class="mono" style="font-weight:700">${t}</td><td class="mono">${d.length}</td><td class="mono">${d[0]?.d||'--'}</td><td class="mono">${d[d.length-1]?.d||'--'}</td><td><button class="btn btn-s" onclick="delete D.prices['${t}'];renderPriceData();toast('${t} removed','info')">Remove</button></td></tr>`}).join(''):'<tr><td colspan="5" class="empty">No price data loaded. Upload CSVs or pull from FMP.</td></tr>';
+  document.getElementById('pd-tbody').innerHTML=tickers.length?tickers.map(t=>{const d=D.prices[t];return`<tr><td class="mono" style="font-weight:700">${t}</td><td class="mono">${d.length}</td><td class="mono">${d[0]?.d||'--'}</td><td class="mono">${d[d.length-1]?.d||'--'}</td><td><button class="btn btn-s" onclick="delete D.prices['${t}'];savePrices();renderPriceData();toast('${t} removed','info')">Remove</button></td></tr>`}).join(''):'<tr><td colspan="5" class="empty">No price data loaded. Upload CSVs or pull from FMP.</td></tr>';
 }
 
 function handlePriceUpload(e){
@@ -667,11 +671,27 @@ function runBacktest(){
   const annBenchRet=((1+benchRet/100)**(1/years)-1)*100;
 
   // Daily returns for sharpe/vol
-  const dailyRet=[];for(let i=1;i<portValues.length;i++)dailyRet.push(portValues[i].v/portValues[i-1].v-1);
+  const dailyRet=[];const benchDailyRet=[];
+  for(let i=1;i<portValues.length;i++){dailyRet.push(portValues[i].v/portValues[i-1].v-1);benchDailyRet.push(benchValues[i].v/benchValues[i-1].v-1)}
   const avgDR=dailyRet.reduce((a,b)=>a+b,0)/dailyRet.length;
   const stdDR=Math.sqrt(dailyRet.reduce((a,b)=>a+(b-avgDR)**2,0)/dailyRet.length);
   const sharpe=stdDR>0?(avgDR/stdDR)*Math.sqrt(252):0;
   const annVol=stdDR*Math.sqrt(252)*100;
+
+  // Sortino (downside deviation only)
+  const downRet=dailyRet.filter(r=>r<0);
+  const downDev=downRet.length>0?Math.sqrt(downRet.reduce((a,b)=>a+b**2,0)/downRet.length):0;
+  const sortino=downDev>0?(avgDR/downDev)*Math.sqrt(252):0;
+
+  // Win rate
+  const winDays=dailyRet.filter(r=>r>0).length;
+  const winRate=dailyRet.length>0?(winDays/dailyRet.length*100):0;
+
+  // Tracking error vs benchmark
+  const excessRet=dailyRet.map((r,i)=>r-benchDailyRet[i]);
+  const avgExcess=excessRet.reduce((a,b)=>a+b,0)/excessRet.length;
+  const trackingError=Math.sqrt(excessRet.reduce((a,b)=>a+(b-avgExcess)**2,0)/excessRet.length)*Math.sqrt(252)*100;
+  const infoRatio=trackingError>0?(avgExcess*252)/(trackingError/100):0;
 
   // Max drawdown
   let peak=0,maxDD=0;
@@ -700,9 +720,14 @@ function runBacktest(){
 
   // Save result
   const result={id:gid(),date:now(),from,to,benchmark:benchTicker,rebalance:rebal,capital,holdings,
-    totalReturn:portRet,benchReturn:benchRet,alpha,annReturn:annRet,sharpe:+sharpe.toFixed(2),maxDD,annVol,
+    totalReturn:portRet,benchReturn:benchRet,alpha,annReturn:annRet,sharpe:+sharpe.toFixed(2),sortino:+sortino.toFixed(2),maxDD,annVol,
+    winRate:+winRate.toFixed(1),trackingError:+trackingError.toFixed(2),infoRatio:+infoRatio.toFixed(2),
     portValues,benchValues,monthly,holdPerf,days:dates.length};
   D.btResults.unshift(result);
+
+  // Save result back to thesis if selected
+  const targetVal=document.getElementById('bt-target').value;
+  if(targetVal.startsWith('th:')){const th=D.theses.find(t=>t.id===targetVal.slice(3));if(th)th.btResult=result}
 
   log('backtest','Backtest complete',`${holdings.length} holdings, ${from} to ${to}: Return ${fP(portRet)}, Alpha ${fP(alpha)}, Sharpe ${sharpe.toFixed(2)}`);
 
@@ -716,10 +741,12 @@ function renderBTResults(r){
   document.getElementById('bt-stats').innerHTML=`
     <div class="st"><div class="sv ${r.totalReturn>=0?'pos':'neg'}">${fP(r.totalReturn)}</div><div class="sl">Total Return</div></div>
     <div class="st"><div class="sv ${r.alpha>=0?'pos':'neg'}">${fP(r.alpha)}</div><div class="sl">Alpha vs ${r.benchmark}</div></div>
-    <div class="st"><div class="sv">${r.sharpe}</div><div class="sl">Sharpe Ratio</div></div>
+    <div class="st"><div class="sv">${r.sharpe}</div><div class="sl">Sharpe</div></div>
+    <div class="st"><div class="sv">${r.sortino||'--'}</div><div class="sl">Sortino</div></div>
     <div class="st"><div class="sv neg">-${r.maxDD.toFixed(1)}%</div><div class="sl">Max Drawdown</div></div>
-    <div class="st"><div class="sv">${r.annVol.toFixed(1)}%</div><div class="sl">Ann. Volatility</div></div>
-    <div class="st"><div class="sv">${r.days}</div><div class="sl">Trading Days</div></div>`;
+    <div class="st"><div class="sv">${r.annVol.toFixed(1)}%</div><div class="sl">Ann. Vol</div></div>
+    <div class="st"><div class="sv">${r.winRate||'--'}%</div><div class="sl">Win Rate</div></div>
+    <div class="st"><div class="sv">${r.infoRatio||'--'}</div><div class="sl">Info Ratio</div></div>`;
 
   // Draw equity curve
   drawChart(r.portValues,r.benchValues,r.benchmark);
@@ -1006,7 +1033,10 @@ function renderAudit(){const f=document.getElementById('aud-filter')?.value||'';
   document.getElementById('aud-tbody').innerHTML=data.length?data.map(a=>`<tr><td class="mono" style="font-size:.72rem">${a.ts}</td><td><span class="badge ${tc[a.type]||'bb'}">${a.type}</span></td><td style="font-weight:500">${a.action}</td><td style="font-size:.78rem">${a.detail}</td><td>${a.user}</td></tr>`).join(''):'<tr><td colspan="5" class="empty">No audit entries</td></tr>'}
 
 // ═══════ DATA HUB ═══════
-function saveKeys(){D.keys.ai=document.getElementById('aiKey').value.trim();D.keys.fmp=document.getElementById('fmpKey').value.trim();D.keys.fh=document.getElementById('fhKey').value.trim();toast('Keys saved','success')}
+function saveKeys(){D.keys.ai=document.getElementById('aiKey').value.trim();D.keys.fmp=document.getElementById('fmpKey').value.trim();D.keys.fh=document.getElementById('fhKey').value.trim();
+  try{localStorage.setItem('etfb-keys',JSON.stringify(D.keys))}catch{}toast('Keys saved','success')}
+function loadKeys(){try{const k=JSON.parse(localStorage.getItem('etfb-keys')||'{}');if(k.ai)D.keys.ai=k.ai;if(k.fmp)D.keys.fmp=k.fmp;if(k.fh)D.keys.fh=k.fh;
+  if(D.keys.ai)document.getElementById('aiKey').value=D.keys.ai;if(D.keys.fmp)document.getElementById('fmpKey').value=D.keys.fmp;if(D.keys.fh)document.getElementById('fhKey').value=D.keys.fh}catch{}}
 
 function parseCSV(t,d=','){const l=t.trim().split('\n');if(l.length<2)return[];const h=l[0].split(d).map(x=>x.trim().replace(/^"|"$/g,''));return l.slice(1).map(ln=>{const v=ln.split(d);const o={};h.forEach((k,i)=>o[k]=v[i]?.trim().replace(/^"|"$/g,'')||'');return o})}
 
@@ -1093,14 +1123,16 @@ let _mok;function showMod(t,b,ok){_mok=ok;document.getElementById('modal-root').
 function closeMod(){document.getElementById('modal-root').innerHTML=''}
 
 // ═══════ INIT ═══════
-initU();initSig();
+initU();initSig();loadKeys();loadPrices();
 // Set default date range
 const dd=new Date();dd.setFullYear(dd.getFullYear()-2);
 document.getElementById('hp-from').value=dd.toISOString().split('T')[0];
 document.getElementById('hp-to').value=today();
 document.getElementById('fhp-from').value=dd.toISOString().split('T')[0];
 document.getElementById('fhp-to').value=today();
-renderDash();toast('ETF Builder ready','success');
+renderDash();
+const pkCount=Object.keys(D.prices).length;
+toast(pkCount?`ETF Builder ready — ${pkCount} tickers with price data`:'ETF Builder ready','success');
 </script>
 </body>
 </html>
